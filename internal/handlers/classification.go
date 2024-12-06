@@ -34,7 +34,7 @@ func (h *Handler) ClassifyService(c *gin.Context) {
 	}
 
 	// Build the payload for the ML model
-	payload := buildPayload(service.Parameters)
+	payload := h.buildPayload(service.Parameters)
 
 	// Call the ML model API
 	predictions, err := callMLModel(payload)
@@ -107,13 +107,18 @@ type assignGroupRequest struct {
 }
 
 // Helper functions
-func buildPayload(parameters []models.Parameter) map[string]int {
+func (h *Handler) buildPayload(parameters []models.Parameter) map[string]int {
+	list, err := h.ParameterRepo.List(0, 100000)
+	if err != nil {
+		return map[string]int{}
+	}
+
 	payload := make(map[string]int)
-	for _, param := range models.AllParameters {
+	for _, param := range list {
 		if contains(parameters, param) {
-			payload[string(param)] = 1
+			payload[param.Code] = 1
 		} else {
-			payload[string(param)] = 0
+			payload[param.Code] = 0
 		}
 	}
 	return payload

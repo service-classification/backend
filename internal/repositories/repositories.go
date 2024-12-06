@@ -94,7 +94,7 @@ func (r *classifiedServiceRepository) GetGroupsByServiceID(serviceID uint) ([]mo
 type GroupRepository interface {
 	GetByID(id uint) (*models.Group, error)
 	List(offset, limit int) ([]models.Group, error)
-	// Additional methods as needed
+	Create(group *models.Group) error
 }
 
 type groupRepository struct {
@@ -115,4 +115,48 @@ func (r *groupRepository) List(offset, limit int) ([]models.Group, error) {
 	var groups []models.Group
 	err := r.db.Offset(offset).Limit(limit).Find(&groups).Error
 	return groups, err
+}
+
+func (r *groupRepository) Create(group *models.Group) error {
+	return r.db.Create(group).Error
+}
+
+type ParameterRepository interface {
+	Create(parameter *models.Parameter) error
+	Update(parameter *models.Parameter) error
+	Delete(code string) error
+	GetByCode(code string) (*models.Parameter, error)
+	List(offset, limit int) ([]models.Parameter, error)
+}
+
+type parameterRepository struct {
+	db *gorm.DB
+}
+
+func NewParameterRepository(db *gorm.DB) ParameterRepository {
+	return &parameterRepository{db}
+}
+
+func (r *parameterRepository) Create(parameter *models.Parameter) error {
+	return r.db.Create(parameter).Error
+}
+
+func (r *parameterRepository) Update(parameter *models.Parameter) error {
+	return r.db.Save(parameter).Error
+}
+
+func (r *parameterRepository) Delete(code string) error {
+	return r.db.Delete(&models.Parameter{}, "code = ?", code).Error
+}
+
+func (r *parameterRepository) GetByCode(code string) (*models.Parameter, error) {
+	var parameter models.Parameter
+	err := r.db.First(&parameter, "code = ?", code).Error
+	return &parameter, err
+}
+
+func (r *parameterRepository) List(offset, limit int) ([]models.Parameter, error) {
+	var parameters []models.Parameter
+	err := r.db.Offset(offset).Limit(limit).Find(&parameters).Error
+	return parameters, err
 }

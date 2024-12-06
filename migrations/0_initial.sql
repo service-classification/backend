@@ -1,4 +1,4 @@
--- migrations/initial.sql
+-- migrations/0_initial.sql
 
 CREATE TABLE services
 (
