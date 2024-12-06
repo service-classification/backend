@@ -278,9 +278,9 @@ func (h *Handler) ListParameters(c *gin.Context) {
 //	@Accept			json
 //	@Produce		json
 //	@Param			parameter	body		models.Parameter	true	"Parameter details"
-//	@Success		201		{object}	models.Parameter
-//	@Failure		400		{object}	map[string]string	"Invalid input"
-//	@Failure		500		{object}	map[string]string	"Internal server error"
+//	@Success		201			{object}	models.Parameter
+//	@Failure		400			{object}	map[string]string	"Invalid input"
+//	@Failure		500			{object}	map[string]string	"Internal server error"
 //	@Router			/parameters [post]
 func (h *Handler) CreateParameter(c *gin.Context) {
 	var parameter models.Parameter

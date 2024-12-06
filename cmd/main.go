@@ -19,7 +19,7 @@ import (
 //	@version		1.0
 //	@description	This is a sample server.
 
-//	@host		 194.135.25.202:8080
+//	@host		194.135.25.202:8080
 //	@BasePath	/
 
 //	@schemes	http

@@ -124,6 +124,56 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "description": "Creates a new group with the provided details.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Groups"
+                ],
+                "summary": "Create a new group",
+                "parameters": [
+                    {
+                        "description": "Group details",
+                        "name": "group",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Group"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Group"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
             }
         },
         "/groups/{id}": {
@@ -175,6 +225,104 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/parameters": {
+            "get": {
+                "description": "Retrieves a list of parameters with pagination.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Parameters"
+                ],
+                "summary": "List parameters with pagination",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Parameter"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new parameter with the provided details.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Parameters"
+                ],
+                "summary": "Create a new parameter",
+                "parameters": [
+                    {
+                        "description": "Parameter details",
+                        "name": "parameter",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Parameter"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Parameter"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -511,91 +659,15 @@ const docTemplate = `{
             }
         },
         "models.Parameter": {
-            "type": "string",
-            "enum": [
-                "mob_inet",
-                "fix_inet",
-                "fix_ctv",
-                "fix_ictv",
-                "voice_mob",
-                "voice_fix",
-                "sms",
-                "csd",
-                "iot",
-                "mms",
-                "roaming",
-                "mg",
-                "mn",
-                "mts",
-                "conc",
-                "fix_op",
-                "vsr_roam",
-                "national_roam",
-                "mn_roam",
-                "voice_ap",
-                "voice_fee",
-                "period_service",
-                "one_time_service",
-                "dop_service",
-                "content",
-                "services_service",
-                "keo_sale",
-                "discount",
-                "only_inbound",
-                "sms_a2p",
-                "sms_gross",
-                "skoring",
-                "other_service",
-                "voice_mail",
-                "geo",
-                "ep_for_number",
-                "ep_for_line",
-                "one_time_fee_for_number",
-                "equipment rent",
-                "add_package"
-            ],
-            "x-enum-varnames": [
-                "MobInet",
-                "FixInet",
-                "FixCtv",
-                "FixIctv",
-                "VoiceMob",
-                "VoiceFix",
-                "Sms",
-                "Csd",
-                "Iot",
-                "Mms",
-                "Roaming",
-                "Mg",
-                "Mn",
-                "Mts",
-                "Conc",
-                "FixOp",
-                "VsrRoam",
-                "NationalRoam",
-                "MnRoam",
-                "VoiceAp",
-                "VoiceFee",
-                "PeriodService",
-                "OneTimeService",
-                "DopService",
-                "Content",
-                "ServicesService",
-                "KeoSale",
-                "Discount",
-                "OnlyInbound",
-                "SmsA2p",
-                "SmsGross",
-                "Skoring",
-                "OtherService",
-                "VoiceMail",
-                "Geo",
-                "EpForNumber",
-                "EpForLine",
-                "OneTimeFeeForNumber",
-                "EquipmentRent",
-                "AddPackage"
-            ]
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
         },
         "models.Service": {
             "type": "object",
@@ -623,7 +695,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "194.135.25.202:8080",
 	BasePath:         "/",
 	Schemes:          []string{"http"},
 	Title:            "MyApp API",

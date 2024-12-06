@@ -14,89 +14,12 @@ definitions:
         type: string
     type: object
   models.Parameter:
-    enum:
-    - mob_inet
-    - fix_inet
-    - fix_ctv
-    - fix_ictv
-    - voice_mob
-    - voice_fix
-    - sms
-    - csd
-    - iot
-    - mms
-    - roaming
-    - mg
-    - mn
-    - mts
-    - conc
-    - fix_op
-    - vsr_roam
-    - national_roam
-    - mn_roam
-    - voice_ap
-    - voice_fee
-    - period_service
-    - one_time_service
-    - dop_service
-    - content
-    - services_service
-    - keo_sale
-    - discount
-    - only_inbound
-    - sms_a2p
-    - sms_gross
-    - skoring
-    - other_service
-    - voice_mail
-    - geo
-    - ep_for_number
-    - ep_for_line
-    - one_time_fee_for_number
-    - equipment rent
-    - add_package
-    type: string
-    x-enum-varnames:
-    - MobInet
-    - FixInet
-    - FixCtv
-    - FixIctv
-    - VoiceMob
-    - VoiceFix
-    - Sms
-    - Csd
-    - Iot
-    - Mms
-    - Roaming
-    - Mg
-    - Mn
-    - Mts
-    - Conc
-    - FixOp
-    - VsrRoam
-    - NationalRoam
-    - MnRoam
-    - VoiceAp
-    - VoiceFee
-    - PeriodService
-    - OneTimeService
-    - DopService
-    - Content
-    - ServicesService
-    - KeoSale
-    - Discount
-    - OnlyInbound
-    - SmsA2p
-    - SmsGross
-    - Skoring
-    - OtherService
-    - VoiceMail
-    - Geo
-    - EpForNumber
-    - EpForLine
-    - OneTimeFeeForNumber
-    - EquipmentRent
-    - AddPackage
+    properties:
+      code:
+        type: string
+      title:
+        type: string
+    type: object
   models.Service:
     properties:
       description:
@@ -110,7 +33,7 @@ definitions:
       title:
         type: string
     type: object
-host: localhost:8080
+host: 194.135.25.202:8080
 info:
   contact: {}
   description: This is a sample server.
@@ -191,6 +114,39 @@ paths:
       summary: List groups with pagination
       tags:
       - Groups
+    post:
+      consumes:
+      - application/json
+      description: Creates a new group with the provided details.
+      parameters:
+      - description: Group details
+        in: body
+        name: group
+        required: true
+        schema:
+          $ref: '#/definitions/models.Group'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Group'
+        "400":
+          description: Invalid input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new group
+      tags:
+      - Groups
   /groups/{id}:
     get:
       consumes:
@@ -230,6 +186,71 @@ paths:
       summary: Get a group by ID
       tags:
       - Groups
+  /parameters:
+    get:
+      description: Retrieves a list of parameters with pagination.
+      parameters:
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Parameter'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List parameters with pagination
+      tags:
+      - Parameters
+    post:
+      consumes:
+      - application/json
+      description: Creates a new parameter with the provided details.
+      parameters:
+      - description: Parameter details
+        in: body
+        name: parameter
+        required: true
+        schema:
+          $ref: '#/definitions/models.Parameter'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Parameter'
+        "400":
+          description: Invalid input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new parameter
+      tags:
+      - Parameters
   /services:
     get:
       description: Fetches a list of services with pagination.
