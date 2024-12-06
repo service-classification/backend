@@ -36,7 +36,7 @@ definitions:
 host: 194.135.25.202:8080
 info:
   contact: {}
-  description: This is a sample server.
+  description: This is a backend server.
   title: MyApp API
   version: "1.0"
 paths:

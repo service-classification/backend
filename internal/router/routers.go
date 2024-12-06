@@ -12,14 +12,14 @@ import (
 func SetupRouter(h *handlers.Handler) *gin.Engine {
 	r := gin.Default()
 
+	// Swagger docs
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	// remove cors
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
 	}))
-
-	// Swagger docs
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Service routes
 	serviceGroup := r.Group("/services")
@@ -38,6 +38,13 @@ func SetupRouter(h *handlers.Handler) *gin.Engine {
 	{
 		groupGroup.GET("/:id", h.GetGroupByID)
 		groupGroup.GET("", h.ListGroups)
+		groupGroup.POST("", h.CreateGroup)
+	}
+
+	parameterGroup := r.Group("/parameters")
+	{
+		parameterGroup.POST("", h.CreateParameter)
+		parameterGroup.GET("", h.ListParameters)
 	}
 
 	// Classification routes

@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend/config"
+	"backend/docs"
 	"backend/internal/handlers"
 	"backend/internal/models"
 	"backend/internal/repositories"
@@ -17,7 +18,7 @@ import (
 
 //	@title			MyApp API
 //	@version		1.0
-//	@description	This is a sample server.
+//	@description	This is a backend server.
 
 //	@host		194.135.25.202:8080
 //	@BasePath	/
@@ -46,6 +47,9 @@ func main() {
 	csRepo := repositories.NewClassifiedServiceRepository(db)
 	paramRepo := repositories.NewParameterRepository(db)
 	handler := handlers.NewHandler(serviceRepo, groupRepo, csRepo, paramRepo)
+
+	docs.SwaggerInfo.Host = "194.135.25.202:8080"
+	docs.SwaggerInfo.Description = "This is a backend server."
 
 	r := router.SetupRouter(handler)
 

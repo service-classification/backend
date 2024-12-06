@@ -4,7 +4,7 @@
     ],
     "swagger": "2.0",
     "info": {
-        "description": "This is a sample server.",
+        "description": "This is a backend server.",
         "title": "MyApp API",
         "contact": {},
         "version": "1.0"
