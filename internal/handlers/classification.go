@@ -13,18 +13,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ClassifyService godoc
-//
-//	@Summary		Classify a service
-//	@Description	Classifies a service by its ID using the ML model.
-//	@Tags			Services
-//	@Accept			json
-//	@Produce		json
-//	@Param			service	query		int						true	"Service ID"
-//	@Success		200		{object}	map[string]interface{}	"Predictions"
-//	@Failure		404		{object}	map[string]string		"Service not found"
-//	@Failure		500		{object}	map[string]string		"Internal server error"
-//	@Router			/classify [post]
 func (h *Handler) ClassifyService(c *gin.Context) {
 	serviceID, _ := strconv.Atoi(c.Query("service"))
 	service, err := h.ServiceRepo.GetByID(uint(serviceID))
@@ -44,66 +32,6 @@ func (h *Handler) ClassifyService(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"predictions": predictions})
-}
-
-// AssignGroupToService godoc
-//
-//	@Summary		Assign a group to a service
-//	@Description	Assigns a group to a service by their IDs.
-//	@Tags			Services
-//	@Accept			json
-//	@Produce		json
-//	@Param			id		path		int					true	"Service ID"
-//	@Param			group	body		assignGroupRequest	true	"Group ID"
-//	@Success		200		{object}	map[string]string
-//	@Failure		400		{object}	map[string]string
-//	@Failure		404		{object}	map[string]string
-//	@Failure		500		{object}	map[string]string
-//	@Router			/services/{id}/group [post]
-func (h *Handler) AssignGroupToService(c *gin.Context) {
-	// Parse service ID from URL parameter
-	serviceIDParam := c.Param("id")
-	serviceIDUint64, err := strconv.ParseUint(serviceIDParam, 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid service ID"})
-		return
-	}
-	serviceID := uint(serviceIDUint64)
-
-	// Parse group ID from request body
-	req := assignGroupRequest{}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON body"})
-		return
-	}
-	groupID := req.GroupID
-
-	// Validate that the service exists
-	_, err = h.ServiceRepo.GetByID(serviceID)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Service not found"})
-		return
-	}
-
-	// Validate that the group exists
-	_, err = h.GroupRepo.GetByID(groupID)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Group not found"})
-		return
-	}
-
-	// Assign group to service
-	err = h.ClassifiedServiceRepo.AssignGroupToService(serviceID, groupID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assign group to service"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Group assigned to service successfully"})
-}
-
-type assignGroupRequest struct {
-	GroupID uint `json:"group_id" example:"2"`
 }
 
 // Helper functions

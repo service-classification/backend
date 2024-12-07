@@ -9,6 +9,7 @@ import (
 	"backend/internal/router"
 	"fmt"
 	"log"
+	"os"
 
 	_ "backend/docs" // This line is necessary for go-swagger to find docs
 
@@ -36,7 +37,7 @@ func main() {
 	}
 
 	// Migrate the schema
-	err = db.AutoMigrate(&models.Service{}, &models.Group{}, &models.ClassifiedService{}, &models.Parameter{})
+	err = db.AutoMigrate(&models.Group{}, &models.Parameter{}, &models.Service{})
 	if err != nil {
 		log.Fatalf("failed to migrate database: %v", err)
 	}
@@ -44,11 +45,10 @@ func main() {
 
 	serviceRepo := repositories.NewServiceRepository(db)
 	groupRepo := repositories.NewGroupRepository(db)
-	csRepo := repositories.NewClassifiedServiceRepository(db)
 	paramRepo := repositories.NewParameterRepository(db)
-	handler := handlers.NewHandler(serviceRepo, groupRepo, csRepo, paramRepo)
+	handler := handlers.NewHandler(serviceRepo, groupRepo, paramRepo)
 
-	docs.SwaggerInfo.Host = "194.135.25.202:8080"
+	docs.SwaggerInfo.Host = os.Getenv("PUBLIC_HOST") + ":8080"
 	docs.SwaggerInfo.Description = "This is a backend server."
 
 	r := router.SetupRouter(handler)
@@ -97,4 +97,60 @@ func migrate(db *gorm.DB) {
 	db.Create(&models.Parameter{Title: "Услуги фикс.телефонии, разовая плата за номер", Code: "one_time_fee_for_number"})
 	db.Create(&models.Parameter{Title: "Услуги фикс. связи, аренда оборудования", Code: "equipment_rent"})
 	db.Create(&models.Parameter{Title: "Дополнительные пакеты", Code: "add_package"})
+
+	db.Create(&models.Group{ID: 1, Title: "Абонентская плата"})
+	db.Create(&models.Group{ID: 4, Title: "Междугородная связь"})
+	db.Create(&models.Group{ID: 5, Title: "Международная связь"})
+	db.Create(&models.Group{ID: 6, Title: "Роуминг внутрисетевой"})
+	db.Create(&models.Group{ID: 7, Title: "Роуминг национальный"})
+	db.Create(&models.Group{ID: 8, Title: "Роуминг международный"})
+	db.Create(&models.Group{ID: 9, Title: "SMS"})
+	db.Create(&models.Group{ID: 10, Title: "Прочие дополнительные услуги"})
+	db.Create(&models.Group{ID: 11, Title: "Контентные услуги SMS"})
+	db.Create(&models.Group{ID: 12, Title: "Передача данных и телематические услуги"})
+	db.Create(&models.Group{ID: 15, Title: "Прочие услуги по абон.обслуживанию"})
+	db.Create(&models.Group{ID: 16, Title: "Товары и аксессуары"})
+	db.Create(&models.Group{ID: 22, Title: "Скидки"})
+	db.Create(&models.Group{ID: 29, Title: "Доходы от GPRS"})
+	db.Create(&models.Group{ID: 33, Title: "Модификаторы входящего трафика в роуминге"})
+	db.Create(&models.Group{ID: 90, Title: "SMS A2P"})
+	db.Create(&models.Group{ID: 91, Title: "Доходы от SMS рассылок (gross)"})
+	db.Create(&models.Group{ID: 99, Title: "Не определено."})
+	db.Create(&models.Group{ID: 100, Title: "Повременная плата за входящий вызов"})
+	db.Create(&models.Group{ID: 101, Title: "Повременная плата за зоновый внутрисетевой трафик"})
+	db.Create(&models.Group{ID: 102, Title: "Повременная плата за зоновый трафик на др. операторов"})
+	db.Create(&models.Group{ID: 103, Title: "Повременная плата за междугородний внутрисетевой трафик"})
+	db.Create(&models.Group{ID: 104, Title: "Повременная плата за междугородний трафик на др. операторов"})
+	db.Create(&models.Group{ID: 105, Title: "Повременная плата за международный трафик"})
+	db.Create(&models.Group{ID: 1001, Title: "Абонентская плата за голосовые услуги"})
+	db.Create(&models.Group{ID: 1004, Title: "SMS в роуминге международный"})
+	db.Create(&models.Group{ID: 1006, Title: "GPRS в роуминге национальный"})
+	db.Create(&models.Group{ID: 1007, Title: "GPRS в роуминге международный"})
+	db.Create(&models.Group{ID: 1016, Title: "MMS"})
+	db.Create(&models.Group{ID: 1027, Title: "Доходы от активации голосовых услуг со сроком действия свыше 6 мес"})
+	db.Create(&models.Group{ID: 1030, Title: "Доходы от голосовой почты"})
+	db.Create(&models.Group{ID: 1033, Title: "Доходы от предоставления услуг доступа в Internet"})
+	db.Create(&models.Group{ID: 1034, Title: "Доходы от предоставления услуг телефонии"})
+	db.Create(&models.Group{ID: 1100, Title: "Доход от совместных услуг Голос/SMS/GPRS"})
+	db.Create(&models.Group{ID: 1121, Title: "Доходы от геоаналитики IoT"})
+	db.Create(&models.Group{ID: 1124, Title: "Доходы от SMS IoT"})
+	db.Create(&models.Group{ID: 1125, Title: "Доходы от GPRS IoT"})
+	db.Create(&models.Group{ID: 1126, Title: "Доходы от голос + CSD IoT"})
+	db.Create(&models.Group{ID: 3001, Title: "_ФБ. Телефония - абонентская плата за номер"})
+	db.Create(&models.Group{ID: 3002, Title: "_ФБ. Телефония - абонентская плата за линию"})
+	db.Create(&models.Group{ID: 3003, Title: "_ФБ. Телефония - установочная плата за абонентский номер"})
+	db.Create(&models.Group{ID: 3009, Title: "_ФБ. Телефония - зоновые исх. вызовы на фикс. операторов"})
+	db.Create(&models.Group{ID: 3010, Title: "_ФБ. Телефония - зоновые исх. вызовы на СПС"})
+	db.Create(&models.Group{ID: 3019, Title: "_ФБ. Телефония - услуги МГ связи от абон. собств. сети"})
+	db.Create(&models.Group{ID: 3020, Title: "_ФБ. Телефония - услуги МН связи от абон. собств. сети"})
+	db.Create(&models.Group{ID: 3031, Title: "_ФБ. Телефония - дополнительные услуги"})
+	db.Create(&models.Group{ID: 3309, Title: "ФБ_Телевидение (ЦТВ) - Абонентская плата за линию"})
+	db.Create(&models.Group{ID: 3311, Title: "ФБ_Реализация товаров, работ и услуг - Физ. лица - Double Play (ЦТВ + Телефония) - Абонентская плата"})
+	db.Create(&models.Group{ID: 3312, Title: "ФБ_Реализация товаров, работ и услуг - Физ. лица - Доступ в Интернет - DoublePlay (ЦТВ) - Абонентская плата"})
+	db.Create(&models.Group{ID: 3313, Title: "ФБ_Реализация товаров, работ и услуг - Физ. лица - Triple Play (Интернет + ЦТВ + Телефония) - Абонентская плата"})
+	db.Create(&models.Group{ID: 3314, Title: "ФБ_Реализация товаров, работ и услуг - Физ. лица - Аренда оборудования по услуге ЦТВ"})
+	db.Create(&models.Group{ID: 3320, Title: "ФБ_Реализация товаров, работ и услуг - Физ. лица - Телеведение (ИЦТВ) - Абонентская плата"})
+	db.Create(&models.Group{ID: 3321, Title: "ФБ_Реализация товаров, работ и услуг - Физ. лица - Доступ в Интернет - Double Play (ИЦТВ) - Абонентская плата"})
+	db.Create(&models.Group{ID: 3322, Title: "ФБ_Реализация товаров, работ и услуг - Физ. лица - Double Play (ИЦТВ + Телефония) - Абонентская плата"})
+	db.Create(&models.Group{ID: 3323, Title: "ФБ_Реализация товаров, работ и услуг - Физ. лица - Triple Play (Интернет + ИЦТВ + Телефония) - Абонентская плата"})
 }

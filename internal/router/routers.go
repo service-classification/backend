@@ -25,18 +25,14 @@ func SetupRouter(h *handlers.Handler) *gin.Engine {
 	serviceGroup := r.Group("/services")
 	{
 		serviceGroup.POST("", h.CreateService)
-		serviceGroup.PUT("/:id", h.UpdateService)
-		serviceGroup.DELETE("/:id", h.DeleteService)
-		serviceGroup.GET("/:id", h.GetServiceByID)
 		serviceGroup.GET("", h.ListServices)
 
-		// Assign group to service
-		serviceGroup.POST("/:id/group", h.AssignGroupToService)
+		serviceGroup.POST("/:id/approve", h.ApproveService)
+		serviceGroup.GET("/:id/proposed_groups", h.ListProposedGroups)
 	}
 
 	groupGroup := r.Group("/groups")
 	{
-		groupGroup.GET("/:id", h.GetGroupByID)
 		groupGroup.GET("", h.ListGroups)
 		groupGroup.POST("", h.CreateGroup)
 	}
@@ -47,8 +43,7 @@ func SetupRouter(h *handlers.Handler) *gin.Engine {
 		parameterGroup.GET("", h.ListParameters)
 	}
 
-	// Classification routes
-	r.POST("/classify", h.ClassifyService)
+	r.GET("/report", h.BuildReport)
 
 	return r
 }

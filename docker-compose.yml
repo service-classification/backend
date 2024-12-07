@@ -4,13 +4,18 @@ services:
   db:
     image: postgres:14
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: serviceclassification
+      POSTGRES_PASSWORD: serviceclassification
       POSTGRES_DB: backend
     networks:
       - app-network
     ports:
       - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U serviceclassification -d backend " ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   ml_model:
     build:
@@ -28,18 +33,20 @@ services:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      - db
-      - ml_model
+      db:
+        condition: service_healthy
     ports:
       - "8080:8080"
     environment:
       DB_HOST: db
       DB_PORT: "5432"
-      DB_USER: postgres
-      DB_PASSWORD: postgres
+      DB_USER: serviceclassification
+      DB_PASSWORD: serviceclassification
       DB_NAME: backend
       ML_MODEL_URL: http://ml_model/predict
       BEARER_TOKEN: your_secure_token
+#      PUBLIC_HOST: 194.135.25.202
+      PUBLIC_HOST: localhost
     networks:
       - app-network
 

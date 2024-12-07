@@ -15,57 +15,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/classify": {
-            "post": {
-                "description": "Classifies a service by its ID using the ML model.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Services"
-                ],
-                "summary": "Classify a service",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Service ID",
-                        "name": "service",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Predictions",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Service not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/groups": {
             "get": {
                 "description": "Retrieves a list of groups with pagination.",
@@ -176,65 +125,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/groups/{id}": {
-            "get": {
-                "description": "Retrieves a group by its ID.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Groups"
-                ],
-                "summary": "Get a group by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Group ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Group"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/parameters": {
             "get": {
                 "description": "Retrieves a list of parameters with pagination.",
@@ -333,6 +223,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/report": {
+            "get": {
+                "description": "Generates a fiscal report in PDF format and returns it as a downloadable file.",
+                "produces": [
+                    "application/pdf"
+                ],
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Build fiscal report",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/services": {
             "get": {
                 "description": "Fetches a list of services with pagination.",
@@ -399,7 +318,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Service"
+                            "$ref": "#/definitions/handlers.NewService"
                         }
                     }
                 ],
@@ -431,143 +350,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/services/{id}": {
-            "get": {
-                "description": "Fetches the details of a service by its ID.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Services"
-                ],
-                "summary": "Get a service by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Service ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Service"
-                        }
-                    },
-                    "404": {
-                        "description": "Service not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Updates the details of an existing service by its ID.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Services"
-                ],
-                "summary": "Update an existing service",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Service ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Service details",
-                        "name": "service",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Service"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Service"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid input",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Service not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Deletes a service by its ID.",
-                "tags": [
-                    "Services"
-                ],
-                "summary": "Delete a service",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Service ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/services/{id}/group": {
+        "/services/{id}/approve": {
             "post": {
-                "description": "Assigns a group to a service by their IDs.",
+                "description": "Approves a service by its ID. If a group ID is provided in the request body, it assigns the group to the service before approval.",
                 "consumes": [
                     "application/json"
                 ],
@@ -577,7 +362,7 @@ const docTemplate = `{
                 "tags": [
                     "Services"
                 ],
-                "summary": "Assign a group to a service",
+                "summary": "Approve a service",
                 "parameters": [
                     {
                         "type": "integer",
@@ -600,14 +385,11 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.Service"
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Invalid input",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -616,7 +398,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Not Found",
+                        "description": "Service or group not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -625,7 +407,66 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/services/{id}/proposed_groups": {
+            "get": {
+                "description": "Fetches a list of proposed groups for a service based on similar parameters.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Services"
+                ],
+                "summary": "List proposed groups for a service",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Service ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Group"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid service ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Service not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -638,12 +479,29 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "handlers.NewService": {
+            "type": "object",
+            "required": [
+                "parameters",
+                "title"
+            ],
+            "properties": {
+                "parameters": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.assignGroupRequest": {
             "type": "object",
             "properties": {
                 "group_id": {
-                    "type": "integer",
-                    "example": 2
+                    "type": "integer"
                 }
             }
         },
@@ -672,8 +530,17 @@ const docTemplate = `{
         "models.Service": {
             "type": "object",
             "properties": {
-                "description": {
+                "approved_at": {
                     "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "group": {
+                    "$ref": "#/definitions/models.Group"
+                },
+                "group_id": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"

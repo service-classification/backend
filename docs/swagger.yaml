@@ -1,9 +1,20 @@
 basePath: /
 definitions:
+  handlers.NewService:
+    properties:
+      parameters:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+    required:
+    - parameters
+    - title
+    type: object
   handlers.assignGroupRequest:
     properties:
       group_id:
-        example: 2
         type: integer
     type: object
   models.Group:
@@ -22,8 +33,14 @@ definitions:
     type: object
   models.Service:
     properties:
-      description:
+      approved_at:
         type: string
+      created_at:
+        type: string
+      group:
+        $ref: '#/definitions/models.Group'
+      group_id:
+        type: integer
       id:
         type: integer
       parameters:
@@ -40,40 +57,6 @@ info:
   title: MyApp API
   version: "1.0"
 paths:
-  /classify:
-    post:
-      consumes:
-      - application/json
-      description: Classifies a service by its ID using the ML model.
-      parameters:
-      - description: Service ID
-        in: query
-        name: service
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Predictions
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Service not found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Classify a service
-      tags:
-      - Services
   /groups:
     get:
       consumes:
@@ -147,45 +130,6 @@ paths:
       summary: Create a new group
       tags:
       - Groups
-  /groups/{id}:
-    get:
-      consumes:
-      - application/json
-      description: Retrieves a group by its ID.
-      parameters:
-      - description: Group ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Group'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Get a group by ID
-      tags:
-      - Groups
   /parameters:
     get:
       description: Retrieves a list of parameters with pagination.
@@ -251,6 +195,26 @@ paths:
       summary: Create a new parameter
       tags:
       - Parameters
+  /report:
+    get:
+      description: Generates a fiscal report in PDF format and returns it as a downloadable
+        file.
+      produces:
+      - application/pdf
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Build fiscal report
+      tags:
+      - Reports
   /services:
     get:
       description: Fetches a list of services with pagination.
@@ -293,7 +257,7 @@ paths:
         name: service
         required: true
         schema:
-          $ref: '#/definitions/models.Service'
+          $ref: '#/definitions/handlers.NewService'
       produces:
       - application/json
       responses:
@@ -316,100 +280,12 @@ paths:
       summary: Create a new service
       tags:
       - Services
-  /services/{id}:
-    delete:
-      description: Deletes a service by its ID.
-      parameters:
-      - description: Service ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "204":
-          description: No Content
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Delete a service
-      tags:
-      - Services
-    get:
-      description: Fetches the details of a service by its ID.
-      parameters:
-      - description: Service ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Service'
-        "404":
-          description: Service not found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Get a service by ID
-      tags:
-      - Services
-    put:
-      consumes:
-      - application/json
-      description: Updates the details of an existing service by its ID.
-      parameters:
-      - description: Service ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Service details
-        in: body
-        name: service
-        required: true
-        schema:
-          $ref: '#/definitions/models.Service'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Service'
-        "400":
-          description: Invalid input
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Service not found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Update an existing service
-      tags:
-      - Services
-  /services/{id}/group:
+  /services/{id}/approve:
     post:
       consumes:
       - application/json
-      description: Assigns a group to a service by their IDs.
+      description: Approves a service by its ID. If a group ID is provided in the
+        request body, it assigns the group to the service before approval.
       parameters:
       - description: Service ID
         in: path
@@ -428,28 +304,66 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.Service'
         "400":
-          description: Bad Request
+          description: Invalid input
           schema:
             additionalProperties:
               type: string
             type: object
         "404":
-          description: Not Found
+          description: Service or group not found
           schema:
             additionalProperties:
               type: string
             type: object
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
             additionalProperties:
               type: string
             type: object
-      summary: Assign a group to a service
+      summary: Approve a service
+      tags:
+      - Services
+  /services/{id}/proposed_groups:
+    get:
+      description: Fetches a list of proposed groups for a service based on similar
+        parameters.
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Group'
+            type: array
+        "400":
+          description: Invalid service ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Service not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List proposed groups for a service
       tags:
       - Services
 schemes:

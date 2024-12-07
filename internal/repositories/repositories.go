@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"backend/internal/models"
-	"errors"
 
 	"gorm.io/gorm"
 )
@@ -37,58 +36,14 @@ func (r *serviceRepository) Delete(id uint) error {
 
 func (r *serviceRepository) GetByID(id uint) (*models.Service, error) {
 	var service models.Service
-	err := r.db.First(&service, id).Error
+	err := r.db.Preload("Parameters").Preload("Group").First(&service, id).Error
 	return &service, err
 }
 
 func (r *serviceRepository) List(offset, limit int) ([]models.Service, error) {
 	var services []models.Service
-	err := r.db.Offset(offset).Limit(limit).Find(&services).Error
+	err := r.db.Preload("Parameters").Preload("Group").Offset(offset).Limit(limit).Find(&services).Error
 	return services, err
-}
-
-type ClassifiedServiceRepository interface {
-	AssignGroupToService(serviceID uint, groupID uint) error
-	RemoveGroupFromService(serviceID uint, groupID uint) error
-	GetGroupsByServiceID(serviceID uint) ([]models.ClassifiedService, error)
-}
-
-type classifiedServiceRepository struct {
-	db *gorm.DB
-}
-
-func NewClassifiedServiceRepository(db *gorm.DB) ClassifiedServiceRepository {
-	return &classifiedServiceRepository{db}
-}
-
-func (r *classifiedServiceRepository) AssignGroupToService(serviceID uint, groupID uint) error {
-	// Check if the association already exists
-	var cs models.ClassifiedService
-	err := r.db.Where("service_id = ? AND group_id = ?", serviceID, groupID).First(&cs).Error
-	if err == nil {
-		// Association already exists
-		return nil
-	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
-		// An unexpected error occurred
-		return err
-	}
-
-	// Create the association
-	cs = models.ClassifiedService{
-		ServiceID: serviceID,
-		GroupID:   groupID,
-	}
-	return r.db.Create(&cs).Error
-}
-
-func (r *classifiedServiceRepository) RemoveGroupFromService(serviceID uint, groupID uint) error {
-	return r.db.Where("service_id = ? AND group_id = ?", serviceID, groupID).Delete(&models.ClassifiedService{}).Error
-}
-
-func (r *classifiedServiceRepository) GetGroupsByServiceID(serviceID uint) ([]models.ClassifiedService, error) {
-	var csList []models.ClassifiedService
-	err := r.db.Where("service_id = ?", serviceID).Find(&csList).Error
-	return csList, err
 }
 
 type GroupRepository interface {
