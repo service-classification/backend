@@ -93,7 +93,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Group"
+                            "$ref": "#/definitions/services.NewGroup"
                         }
                     }
                 ],
@@ -106,6 +106,104 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid input",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/groups/{id}": {
+            "put": {
+                "description": "Updates the details of an existing group.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Groups"
+                ],
+                "summary": "Update an existing group",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Group ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Group details",
+                        "name": "group",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.NewGroup"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Group"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input or group is used in services",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a group by its ID. If the group is used in any services, it returns an error.",
+                "tags": [
+                    "Groups"
+                ],
+                "summary": "Delete a group",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Group ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Group deleted successfully"
+                    },
+                    "400": {
+                        "description": "Group is used in services",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -191,7 +289,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Parameter"
+                            "$ref": "#/definitions/services.NewParameter"
                         }
                     }
                 ],
@@ -204,6 +302,104 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid input",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/parameters/{id}": {
+            "put": {
+                "description": "Updates an existing parameter with the provided details.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Parameters"
+                ],
+                "summary": "Update an existing parameter",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Parameter ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Parameter details",
+                        "name": "parameter",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.NewParameter"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Parameter"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input or parameter is used in services",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a parameter by its ID. If the parameter is used in any services, it returns an error.",
+                "tags": [
+                    "Parameters"
+                ],
+                "summary": "Delete a parameter",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Parameter ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Parameter deleted successfully"
+                    },
+                    "400": {
+                        "description": "Parameter is used in services",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -508,10 +704,16 @@ const docTemplate = `{
         "models.Group": {
             "type": "object",
             "properties": {
+                "created_at": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
                 "title": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -519,10 +721,16 @@ const docTemplate = `{
         "models.Parameter": {
             "type": "object",
             "properties": {
-                "code": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -550,6 +758,52 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/models.Parameter"
                     }
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "services.NewGroup": {
+            "type": "object",
+            "properties": {
+                "allowed_parameters": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "mob_inet",
+                        "fix_ctv",
+                        "voice_fix"
+                    ]
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 3042
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "services.NewParameter": {
+            "type": "object",
+            "properties": {
+                "allowed_classes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "1",
+                        "1033",
+                        "3023"
+                    ]
+                },
+                "id": {
+                    "type": "string",
+                    "example": "fix_ctv"
                 },
                 "title": {
                     "type": "string"

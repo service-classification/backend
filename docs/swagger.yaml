@@ -19,16 +19,24 @@ definitions:
     type: object
   models.Group:
     properties:
+      created_at:
+        type: string
       id:
         type: integer
       title:
         type: string
+      updated_at:
+        type: string
     type: object
   models.Parameter:
     properties:
-      code:
+      created_at:
+        type: string
+      id:
         type: string
       title:
+        type: string
+      updated_at:
         type: string
     type: object
   models.Service:
@@ -47,6 +55,38 @@ definitions:
         items:
           $ref: '#/definitions/models.Parameter'
         type: array
+      title:
+        type: string
+    type: object
+  services.NewGroup:
+    properties:
+      allowed_parameters:
+        example:
+        - mob_inet
+        - fix_ctv
+        - voice_fix
+        items:
+          type: string
+        type: array
+      id:
+        example: 3042
+        type: integer
+      title:
+        type: string
+    type: object
+  services.NewParameter:
+    properties:
+      allowed_classes:
+        example:
+        - "1"
+        - "1033"
+        - "3023"
+        items:
+          type: string
+        type: array
+      id:
+        example: fix_ctv
+        type: string
       title:
         type: string
     type: object
@@ -107,7 +147,7 @@ paths:
         name: group
         required: true
         schema:
-          $ref: '#/definitions/models.Group'
+          $ref: '#/definitions/services.NewGroup'
       produces:
       - application/json
       responses:
@@ -128,6 +168,72 @@ paths:
               type: string
             type: object
       summary: Create a new group
+      tags:
+      - Groups
+  /groups/{id}:
+    delete:
+      description: Deletes a group by its ID. If the group is used in any services,
+        it returns an error.
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: Group deleted successfully
+        "400":
+          description: Group is used in services
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a group
+      tags:
+      - Groups
+    put:
+      consumes:
+      - application/json
+      description: Updates the details of an existing group.
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Group details
+        in: body
+        name: group
+        required: true
+        schema:
+          $ref: '#/definitions/services.NewGroup'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Group'
+        "400":
+          description: Invalid input or group is used in services
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update an existing group
       tags:
       - Groups
   /parameters:
@@ -172,7 +278,7 @@ paths:
         name: parameter
         required: true
         schema:
-          $ref: '#/definitions/models.Parameter'
+          $ref: '#/definitions/services.NewParameter'
       produces:
       - application/json
       responses:
@@ -193,6 +299,72 @@ paths:
               type: string
             type: object
       summary: Create a new parameter
+      tags:
+      - Parameters
+  /parameters/{id}:
+    delete:
+      description: Deletes a parameter by its ID. If the parameter is used in any
+        services, it returns an error.
+      parameters:
+      - description: Parameter ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: Parameter deleted successfully
+        "400":
+          description: Parameter is used in services
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a parameter
+      tags:
+      - Parameters
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing parameter with the provided details.
+      parameters:
+      - description: Parameter ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Parameter details
+        in: body
+        name: parameter
+        required: true
+        schema:
+          $ref: '#/definitions/services.NewParameter'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Parameter'
+        "400":
+          description: Invalid input or parameter is used in services
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update an existing parameter
       tags:
       - Parameters
   /report:

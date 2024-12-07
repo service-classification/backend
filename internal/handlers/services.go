@@ -35,7 +35,7 @@ func (h *Handler) CreateService(c *gin.Context) {
 
 	params := make([]models.Parameter, 0, len(newService.Parameters))
 	for _, param := range newService.Parameters {
-		parameter, err := h.ParameterRepo.GetByCode(param)
+		parameter, err := h.ParameterRepo.GetByID(param)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid parameter"})
 			return

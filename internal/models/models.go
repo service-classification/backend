@@ -5,8 +5,10 @@ import (
 )
 
 type Parameter struct {
-	Code  string `gorm:"primaryKey" json:"code"`
-	Title string `json:"title"`
+	ID        string    `gorm:"primaryKey" json:"id"`
+	Title     string    `json:"title"`
+	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
+	UpdateAt  time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 }
 
 type Service struct {
@@ -20,6 +22,8 @@ type Service struct {
 }
 
 type Group struct {
-	ID    uint   `gorm:"primaryKey" json:"id"`
-	Title string `json:"title"`
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	Title     string    `json:"title"`
+	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
+	UpdateAt  time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 }

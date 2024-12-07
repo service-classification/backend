@@ -44,9 +44,9 @@ func (h *Handler) buildPayload(parameters []models.Parameter) map[string]int {
 	payload := make(map[string]int)
 	for _, param := range list {
 		if contains(parameters, param) {
-			payload[param.Code] = 1
+			payload[param.ID] = 1
 		} else {
-			payload[param.Code] = 0
+			payload[param.ID] = 0
 		}
 	}
 	return payload

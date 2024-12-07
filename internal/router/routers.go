@@ -35,12 +35,16 @@ func SetupRouter(h *handlers.Handler) *gin.Engine {
 	{
 		groupGroup.GET("", h.ListGroups)
 		groupGroup.POST("", h.CreateGroup)
+		groupGroup.PUT("/:id", h.UpdateGroup)
+		groupGroup.DELETE("/:id", h.DeleteGroup)
 	}
 
 	parameterGroup := r.Group("/parameters")
 	{
 		parameterGroup.POST("", h.CreateParameter)
 		parameterGroup.GET("", h.ListParameters)
+		parameterGroup.PUT("/:id", h.UpdateParameter)
+		parameterGroup.DELETE("/:id", h.DeleteParameter)
 	}
 
 	r.GET("/report", h.BuildReport)

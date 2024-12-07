@@ -12,6 +12,8 @@ type ServiceRepository interface {
 	Delete(id uint) error
 	GetByID(id uint) (*models.Service, error)
 	List(offset, limit int) ([]models.Service, error)
+	FindByParameterID(parameterID string) ([]models.Service, error)
+	FindByGroupID(id uint) ([]models.Service, error)
 }
 
 type serviceRepository struct {
@@ -46,10 +48,32 @@ func (r *serviceRepository) List(offset, limit int) ([]models.Service, error) {
 	return services, err
 }
 
+func (r *serviceRepository) FindByParameterID(parameterID string) ([]models.Service, error) {
+	var services []models.Service
+	err := r.db.
+		Preload("Parameters").
+		Joins("JOIN service_parameters ON services.id = service_parameters.service_id").
+		Joins("JOIN parameters ON service_parameters.parameter_id = parameters.id").
+		Where("parameters.id = ?", parameterID).
+		Find(&services).Error
+	return services, err
+}
+
+func (r *serviceRepository) FindByGroupID(id uint) ([]models.Service, error) {
+	var services []models.Service
+	err := r.db.
+		Preload("Group").
+		Where("group_id = ?", id).
+		Find(&services).Error
+	return services, err
+}
+
 type GroupRepository interface {
 	GetByID(id uint) (*models.Group, error)
 	List(offset, limit int) ([]models.Group, error)
+	Update(group *models.Group) error
 	Create(group *models.Group) error
+	Delete(u uint) error
 }
 
 type groupRepository struct {
@@ -76,11 +100,19 @@ func (r *groupRepository) Create(group *models.Group) error {
 	return r.db.Create(group).Error
 }
 
+func (r *groupRepository) Update(group *models.Group) error {
+	return r.db.Save(group).Error
+}
+
+func (r *groupRepository) Delete(u uint) error {
+	return r.db.Delete(&models.Group{}, u).Error
+}
+
 type ParameterRepository interface {
 	Create(parameter *models.Parameter) error
 	Update(parameter *models.Parameter) error
 	Delete(code string) error
-	GetByCode(code string) (*models.Parameter, error)
+	GetByID(code string) (*models.Parameter, error)
 	List(offset, limit int) ([]models.Parameter, error)
 }
 
@@ -101,12 +133,12 @@ func (r *parameterRepository) Update(parameter *models.Parameter) error {
 }
 
 func (r *parameterRepository) Delete(code string) error {
-	return r.db.Delete(&models.Parameter{}, "code = ?", code).Error
+	return r.db.Delete(&models.Parameter{}, "id = ?", code).Error
 }
 
-func (r *parameterRepository) GetByCode(code string) (*models.Parameter, error) {
+func (r *parameterRepository) GetByID(code string) (*models.Parameter, error) {
 	var parameter models.Parameter
-	err := r.db.First(&parameter, "code = ?", code).Error
+	err := r.db.First(&parameter, "id = ?", code).Error
 	return &parameter, err
 }
 
