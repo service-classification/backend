@@ -15,13 +15,13 @@ func NewGroupService(groupRepo repositories.GroupRepository) *GroupService {
 	}
 }
 
-type NewGroup struct {
+type GroupView struct {
 	ID                uint     `json:"id" example:"3042"`
 	Title             string   `json:"title"`
 	AllowedParameters []string `json:"allowed_parameters" example:"mob_inet,fix_ctv,voice_fix"`
 }
 
-func (s *GroupService) CreateGroup(group NewGroup) (*models.Group, error) {
+func (s *GroupService) CreateGroup(group GroupView) (*models.Group, error) {
 	model := &models.Group{
 		ID:    group.ID,
 		Title: group.Title,

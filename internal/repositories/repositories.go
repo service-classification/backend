@@ -44,7 +44,13 @@ func (r *serviceRepository) GetByID(id uint) (*models.Service, error) {
 
 func (r *serviceRepository) List(offset, limit int) ([]models.Service, error) {
 	var services []models.Service
-	err := r.db.Preload("Parameters").Preload("Group").Offset(offset).Limit(limit).Find(&services).Error
+	err := r.db.
+		Preload("Group").
+		Offset(offset).
+		Limit(limit).
+		Order("approved_at IS NOT NULL, approved_at DESC").
+		Find(&services).
+		Error
 	return services, err
 }
 

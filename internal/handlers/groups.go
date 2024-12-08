@@ -3,10 +3,12 @@ package handlers
 import (
 	"backend/internal/models"
 	"backend/internal/services"
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // ListGroups godoc
@@ -50,13 +52,13 @@ func (h *Handler) ListGroups(c *gin.Context) {
 //	@Tags			Groups
 //	@Accept			json
 //	@Produce		json
-//	@Param			group	body		services.NewGroup	true	"Group details"
+//	@Param			group	body		services.GroupView	true	"Group details"
 //	@Success		201		{object}	models.Group
 //	@Failure		400		{object}	map[string]string	"Invalid input"
 //	@Failure		500		{object}	map[string]string	"Internal server error"
 //	@Router			/groups [post]
 func (h *Handler) CreateGroup(c *gin.Context) {
-	var group services.NewGroup
+	var group services.GroupView
 	if err := c.ShouldBindJSON(&group); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -71,6 +73,48 @@ func (h *Handler) CreateGroup(c *gin.Context) {
 	c.JSON(http.StatusCreated, created)
 }
 
+// GetGroupByID godoc
+//
+//	@Summary		Get a group by ID
+//	@Description	Retrieves a group by its ID.
+//	@Tags			Groups
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		int	true	"Group ID"
+//	@Success		200	{object}	services.GroupView
+//	@Failure		400	{object}	map[string]string
+//	@Failure		404	{object}	map[string]string
+//	@Failure		500	{object}	map[string]string
+//	@Router			/groups/{id} [get]
+func (h *Handler) GetGroupByID(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid group ID"})
+		return
+	}
+
+	group, err := h.GroupRepo.GetByID(uint(id))
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Group not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
+
+	//todo add rules from the knowledge base
+
+	view := services.GroupView{
+		ID:                group.ID,
+		Title:             group.Title,
+		AllowedParameters: []string{"mob_inet", "fix_ctv", "voice_fix"},
+	}
+
+	c.JSON(http.StatusOK, view)
+}
+
 // UpdateGroup godoc
 //
 //	@Summary		Update an existing group
@@ -79,7 +123,7 @@ func (h *Handler) CreateGroup(c *gin.Context) {
 //	@Accept			json
 //	@Produce		json
 //	@Param			id		path		int					true	"Group ID"
-//	@Param			group	body		services.NewGroup	true	"Group details"
+//	@Param			group	body		services.GroupView	true	"Group details"
 //	@Success		200		{object}	models.Group
 //	@Failure		400		{object}	map[string]string	"Invalid input or group is used in services"
 //	@Failure		500		{object}	map[string]string	"Internal server error"
@@ -91,7 +135,7 @@ func (h *Handler) UpdateGroup(c *gin.Context) {
 		return
 	}
 
-	var group services.NewGroup
+	var group services.GroupView
 	if err := c.ShouldBindJSON(&group); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

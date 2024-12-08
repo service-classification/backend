@@ -26,6 +26,7 @@ func SetupRouter(h *handlers.Handler) *gin.Engine {
 	{
 		serviceGroup.POST("", h.CreateService)
 		serviceGroup.GET("", h.ListServices)
+		serviceGroup.GET("/:id", h.GetServiceByID)
 
 		serviceGroup.POST("/:id/approve", h.ApproveService)
 		serviceGroup.GET("/:id/proposed_groups", h.ListProposedGroups)
@@ -34,6 +35,7 @@ func SetupRouter(h *handlers.Handler) *gin.Engine {
 	groupGroup := r.Group("/groups")
 	{
 		groupGroup.GET("", h.ListGroups)
+		groupGroup.GET("/:id", h.GetGroupByID)
 		groupGroup.POST("", h.CreateGroup)
 		groupGroup.PUT("/:id", h.UpdateGroup)
 		groupGroup.DELETE("/:id", h.DeleteGroup)
@@ -43,6 +45,7 @@ func SetupRouter(h *handlers.Handler) *gin.Engine {
 	{
 		parameterGroup.POST("", h.CreateParameter)
 		parameterGroup.GET("", h.ListParameters)
+		parameterGroup.GET("/:id", h.GetParameterByID)
 		parameterGroup.PUT("/:id", h.UpdateParameter)
 		parameterGroup.DELETE("/:id", h.DeleteParameter)
 	}

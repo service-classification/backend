@@ -93,7 +93,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/services.NewGroup"
+                            "$ref": "#/definitions/services.GroupView"
                         }
                     }
                 ],
@@ -126,6 +126,63 @@ const docTemplate = `{
             }
         },
         "/groups/{id}": {
+            "get": {
+                "description": "Retrieves a group by its ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Groups"
+                ],
+                "summary": "Get a group by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Group ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/services.GroupView"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
             "put": {
                 "description": "Updates the details of an existing group.",
                 "consumes": [
@@ -152,7 +209,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/services.NewGroup"
+                            "$ref": "#/definitions/services.GroupView"
                         }
                     }
                 ],
@@ -289,7 +346,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/services.NewParameter"
+                            "$ref": "#/definitions/services.ParameterView"
                         }
                     }
                 ],
@@ -322,6 +379,42 @@ const docTemplate = `{
             }
         },
         "/parameters/{id}": {
+            "get": {
+                "description": "Retrieves a parameter by its ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Parameters"
+                ],
+                "summary": "Get a parameter by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Parameter ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/services.ParameterView"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
             "put": {
                 "description": "Updates an existing parameter with the provided details.",
                 "consumes": [
@@ -348,7 +441,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/services.NewParameter"
+                            "$ref": "#/definitions/services.ParameterView"
                         }
                     }
                 ],
@@ -536,6 +629,44 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/services/{id}": {
+            "get": {
+                "description": "Fetches the details of a service by its ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Services"
+                ],
+                "summary": "Get a service by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Service ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Service"
+                        }
+                    },
+                    "404": {
+                        "description": "Service not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -764,7 +895,7 @@ const docTemplate = `{
                 }
             }
         },
-        "services.NewGroup": {
+        "services.GroupView": {
             "type": "object",
             "properties": {
                 "allowed_parameters": {
@@ -787,7 +918,7 @@ const docTemplate = `{
                 }
             }
         },
-        "services.NewParameter": {
+        "services.ParameterView": {
             "type": "object",
             "properties": {
                 "allowed_classes": {

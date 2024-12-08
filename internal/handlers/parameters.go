@@ -40,13 +40,13 @@ func (h *Handler) ListParameters(c *gin.Context) {
 //	@Tags			Parameters
 //	@Accept			json
 //	@Produce		json
-//	@Param			parameter	body		services.NewParameter	true	"Parameter details"
+//	@Param			parameter	body		services.ParameterView	true	"Parameter details"
 //	@Success		201			{object}	models.Parameter
 //	@Failure		400			{object}	map[string]string	"Invalid input"
 //	@Failure		500			{object}	map[string]string	"Internal server error"
 //	@Router			/parameters [post]
 func (h *Handler) CreateParameter(c *gin.Context) {
-	var parameter services.NewParameter
+	var parameter services.ParameterView
 	if err := c.ShouldBindJSON(&parameter); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -61,6 +61,36 @@ func (h *Handler) CreateParameter(c *gin.Context) {
 	c.JSON(http.StatusCreated, created)
 }
 
+// GetParameterByID godoc
+//
+//	@Summary		Get a parameter by ID
+//	@Description	Retrieves a parameter by its ID.
+//	@Tags			Parameters
+//	@Produce		json
+//	@Param			id	path		string	true	"Parameter ID"
+//	@Success		200	{object}	services.ParameterView
+//	@Failure		500	{object}	map[string]string	"Internal server error"
+//	@Router			/parameters/{id} [get]
+func (h *Handler) GetParameterByID(context *gin.Context) {
+	parameterID := context.Param("id")
+
+	parameter, err := h.ParameterRepo.GetByID(parameterID)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	//todo add rules from the knowledge base
+
+	view := services.ParameterView{
+		ID:             parameter.ID,
+		Title:          parameter.Title,
+		AllowedClasses: []string{"1", "1033", "3023"},
+	}
+
+	context.JSON(http.StatusOK, view)
+}
+
 // UpdateParameter godoc
 //
 //	@Summary		Update an existing parameter
@@ -69,7 +99,7 @@ func (h *Handler) CreateParameter(c *gin.Context) {
 //	@Accept			json
 //	@Produce		json
 //	@Param			id			path		string					true	"Parameter ID"
-//	@Param			parameter	body		services.NewParameter	true	"Parameter details"
+//	@Param			parameter	body		services.ParameterView	true	"Parameter details"
 //	@Success		200			{object}	models.Parameter
 //	@Failure		400			{object}	map[string]string	"Invalid input or parameter is used in services"
 //	@Failure		500			{object}	map[string]string	"Internal server error"
@@ -77,7 +107,7 @@ func (h *Handler) CreateParameter(c *gin.Context) {
 func (h *Handler) UpdateParameter(c *gin.Context) {
 	parameterID := c.Param("id")
 
-	var parameter services.NewParameter
+	var parameter services.ParameterView
 	if err := c.ShouldBindJSON(&parameter); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

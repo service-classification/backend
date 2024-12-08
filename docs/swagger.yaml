@@ -58,7 +58,7 @@ definitions:
       title:
         type: string
     type: object
-  services.NewGroup:
+  services.GroupView:
     properties:
       allowed_parameters:
         example:
@@ -74,7 +74,7 @@ definitions:
       title:
         type: string
     type: object
-  services.NewParameter:
+  services.ParameterView:
     properties:
       allowed_classes:
         example:
@@ -147,7 +147,7 @@ paths:
         name: group
         required: true
         schema:
-          $ref: '#/definitions/services.NewGroup'
+          $ref: '#/definitions/services.GroupView'
       produces:
       - application/json
       responses:
@@ -198,6 +198,44 @@ paths:
       summary: Delete a group
       tags:
       - Groups
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a group by its ID.
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.GroupView'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a group by ID
+      tags:
+      - Groups
     put:
       consumes:
       - application/json
@@ -213,7 +251,7 @@ paths:
         name: group
         required: true
         schema:
-          $ref: '#/definitions/services.NewGroup'
+          $ref: '#/definitions/services.GroupView'
       produces:
       - application/json
       responses:
@@ -278,7 +316,7 @@ paths:
         name: parameter
         required: true
         schema:
-          $ref: '#/definitions/services.NewParameter'
+          $ref: '#/definitions/services.ParameterView'
       produces:
       - application/json
       responses:
@@ -329,6 +367,30 @@ paths:
       summary: Delete a parameter
       tags:
       - Parameters
+    get:
+      description: Retrieves a parameter by its ID.
+      parameters:
+      - description: Parameter ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.ParameterView'
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a parameter by ID
+      tags:
+      - Parameters
     put:
       consumes:
       - application/json
@@ -344,7 +406,7 @@ paths:
         name: parameter
         required: true
         schema:
-          $ref: '#/definitions/services.NewParameter'
+          $ref: '#/definitions/services.ParameterView'
       produces:
       - application/json
       responses:
@@ -450,6 +512,31 @@ paths:
               type: string
             type: object
       summary: Create a new service
+      tags:
+      - Services
+  /services/{id}:
+    get:
+      description: Fetches the details of a service by its ID.
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Service'
+        "404":
+          description: Service not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a service by ID
       tags:
       - Services
   /services/{id}/approve:

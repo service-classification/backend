@@ -82,6 +82,28 @@ func (h *Handler) ListServices(c *gin.Context) {
 	c.JSON(http.StatusOK, services)
 }
 
+// GetServiceByID godoc
+//
+//	@Summary		Get a service by ID
+//	@Description	Fetches the details of a service by its ID.
+//	@Tags			Services
+//	@Produce		json
+//	@Param			id	path		int	true	"Service ID"
+//	@Success		200	{object}	models.Service
+//	@Failure		404	{object}	map[string]string	"Service not found"
+//	@Router			/services/{id} [get]
+func (h *Handler) GetServiceByID(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	service, err := h.ServiceRepo.GetByID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Service not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, service)
+}
+
 type assignGroupRequest struct {
 	GroupID *uint `json:"group_id,omitempty"`
 }
