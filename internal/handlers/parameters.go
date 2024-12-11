@@ -85,7 +85,7 @@ func (h *Handler) GetParameterByID(context *gin.Context) {
 	view := services.ParameterView{
 		ID:             parameter.ID,
 		Title:          parameter.Title,
-		AllowedClasses: []string{"1", "1033", "3023"},
+		AllowedClasses: []int{1, 1033, 3023},
 	}
 
 	context.JSON(http.StatusOK, view)
