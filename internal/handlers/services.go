@@ -64,12 +64,7 @@ func (h *Handler) CreateService(c *gin.Context) {
 			return
 		}
 		if len(predictions) > 0 {
-			groupID, err := strconv.Atoi(predictions[0].GroupID)
-			if err != nil {
-				log.Println("Invalid group ID:", err)
-				return
-			}
-			group, err := h.GroupRepo.GetByID(uint(groupID))
+			group, err := h.GroupRepo.GetByID(uint(predictions[0].GroupID))
 			if err != nil {
 				log.Println("Group not found:", err)
 				return

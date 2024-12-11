@@ -137,6 +137,6 @@ func callMLModel(payload map[string]int) ([]Prediction, error) {
 }
 
 type Prediction struct {
-	GroupID     string  `json:"group_id"`
+	GroupID     int     `json:"group_id"`
 	Probability float64 `json:"probability"`
 }
