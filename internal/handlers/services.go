@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"backend/internal/models"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -54,6 +55,33 @@ func (h *Handler) CreateService(c *gin.Context) {
 	}
 
 	//todo classify the service
+
+	go func() {
+		payload := h.buildPayload(service.Parameters)
+		predictions, err := callMLModel(payload)
+		if err != nil {
+			log.Println("Error calling ML model:", err)
+			return
+		}
+		if len(predictions) > 0 {
+			groupID, err := strconv.Atoi(predictions[0].GroupID)
+			if err != nil {
+				log.Println("Invalid group ID:", err)
+				return
+			}
+			group, err := h.GroupRepo.GetByID(uint(groupID))
+			if err != nil {
+				log.Println("Group not found:", err)
+				return
+			}
+			service.Group = group
+			err = h.ServiceRepo.Update(service)
+			if err != nil {
+				log.Println("Error updating service:", err)
+				return
+			}
+		}
+	}()
 
 	c.JSON(http.StatusCreated, service)
 }

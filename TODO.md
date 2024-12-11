@@ -10,14 +10,14 @@ Expert
 
 * [x] Create new parameter
 * [x] Create new class
-    * [ ] add a restriction for the class (to the IS)
-* [ ] class approval for the new service by the expert
-* [ ] In case of refusal of the proposed class - display a window with possible classes (IS)
+    * [x] add a restriction for the class (to the IS)
+* [x] class approval for the new service by the expert
+* [x] In case of refusal of the proposed class - display a window with possible classes (IS)
 
 Model
 
-* [ ] Predicting a class for a new service
-* [ ] Re-training the model when adding a new class/parameter
+* [x] Predicting a class for a new service
+* [-] Re-training the model when adding a new class/parameter
 
 API:
 
@@ -55,3 +55,4 @@ Group {
   new: boolean,
   restrictions: string[], // -> OWL rules
 }
+

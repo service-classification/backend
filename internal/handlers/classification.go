@@ -36,17 +36,53 @@ func (h *Handler) ClassifyService(c *gin.Context) {
 
 // Helper functions
 func (h *Handler) buildPayload(parameters []models.Parameter) map[string]int {
-	list, err := h.ParameterRepo.List(0, 100000)
-	if err != nil {
-		return map[string]int{}
+	// from list filter only allowed parameters:
+	payload := map[string]int{
+		"mob_inet":                0,
+		"fix_inet":                0,
+		"fix_ctv":                 0,
+		"fix_ictv":                0,
+		"voice_mob":               0,
+		"voice_fix":               0,
+		"sms":                     0,
+		"csd":                     0,
+		"iot":                     0,
+		"mms":                     0,
+		"roaming":                 0,
+		"mg":                      0,
+		"mn":                      0,
+		"mts":                     0,
+		"conc":                    0,
+		"fix_op":                  0,
+		"vsr_roam":                0,
+		"national_roam":           0,
+		"mn_roam":                 0,
+		"voice_ap":                0,
+		"voice_fee":               0,
+		"period_service":          0,
+		"one_time_service":        0,
+		"dop_service":             0,
+		"content":                 0,
+		"services_service":        0,
+		"keo_sale":                0,
+		"discount":                0,
+		"only_inbound":            0,
+		"sms_a2p":                 0,
+		"sms_gross":               0,
+		"skoring":                 0,
+		"other_service":           0,
+		"voice_mail":              0,
+		"geo":                     0,
+		"ep_for_number":           0,
+		"ep_for_line":             0,
+		"one_time_fee_for_number": 0,
+		"equipment rent":          0,
+		"add_package":             0,
 	}
 
-	payload := make(map[string]int)
-	for _, param := range list {
-		if contains(parameters, param) {
+	for _, param := range parameters {
+		if _, ok := payload[param.ID]; ok {
 			payload[param.ID] = 1
-		} else {
-			payload[param.ID] = 0
 		}
 	}
 	return payload
@@ -61,7 +97,7 @@ func contains(slice []models.Parameter, item models.Parameter) bool {
 	return false
 }
 
-func callMLModel(payload map[string]int) ([]map[string]interface{}, error) {
+func callMLModel(payload map[string]int) ([]Prediction, error) {
 	url := os.Getenv("ML_MODEL_URL")   // todo from config
 	token := os.Getenv("BEARER_TOKEN") // todo from config
 
@@ -90,7 +126,7 @@ func callMLModel(payload map[string]int) ([]map[string]interface{}, error) {
 	}
 
 	var result struct {
-		Predictions []map[string]interface{} `json:"predictions"`
+		Predictions []Prediction `json:"predictions"`
 	}
 	err = json.NewDecoder(resp.Body).Decode(&result)
 	if err != nil {
@@ -98,4 +134,9 @@ func callMLModel(payload map[string]int) ([]map[string]interface{}, error) {
 	}
 
 	return result.Predictions, nil
+}
+
+type Prediction struct {
+	GroupID     string  `json:"group_id"`
+	Probability float64 `json:"probability"`
 }
