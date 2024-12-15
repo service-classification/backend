@@ -29,7 +29,7 @@ func (r *serviceRepository) Create(service *models.Service) error {
 }
 
 func (r *serviceRepository) Update(service *models.Service) error {
-	return r.db.Save(service).Error
+	return r.db.Model(service).Omit("CreatedAt").Updates(service).Error
 }
 
 func (r *serviceRepository) Delete(id uint) error {
@@ -107,7 +107,7 @@ func (r *classRepository) Create(class *models.Class) error {
 }
 
 func (r *classRepository) Update(class *models.Class) error {
-	return r.db.Save(class).Error
+	return r.db.Model(class).Omit("CreatedAt").Updates(class).Error
 }
 
 func (r *classRepository) Delete(u uint) error {
@@ -135,7 +135,7 @@ func (r *parameterRepository) Create(parameter *models.Parameter) error {
 }
 
 func (r *parameterRepository) Update(parameter *models.Parameter) error {
-	return r.db.Save(parameter).Error
+	return r.db.Model(parameter).Omit("CreatedAt").Updates(parameter).Error
 }
 
 func (r *parameterRepository) Delete(code string) error {

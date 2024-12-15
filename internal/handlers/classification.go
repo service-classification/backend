@@ -5,34 +5,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
-	"strconv"
-
-	"github.com/gin-gonic/gin"
 )
-
-func (h *Handler) ClassifyService(c *gin.Context) {
-	serviceID, _ := strconv.Atoi(c.Query("service"))
-	service, err := h.ServiceRepo.GetByID(uint(serviceID))
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Service not found"})
-		return
-	}
-
-	// Build the payload for the ML model
-	payload := h.buildPayload(service.Parameters)
-
-	// Call the ML model API
-	predictions, err := callMLModel(payload)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"predictions": predictions})
-}
 
 // Helper functions
 func (h *Handler) buildPayload(parameters []models.Parameter) map[string]int {
@@ -112,7 +88,7 @@ func callMLModel(payload map[string]int) ([]Prediction, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		bodyBytes, _ := ioutil.ReadAll(resp.Body)
+		bodyBytes, _ := io.ReadAll(resp.Body)
 		return nil, errors.New(string(bodyBytes))
 	}
 

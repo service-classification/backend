@@ -28,6 +28,22 @@ definitions:
       updated_at:
         type: string
     type: object
+  models.ClassView:
+    properties:
+      allowed_parameters:
+        example:
+        - mob_inet
+        - fix_ctv
+        - voice_fix
+        items:
+          type: string
+        type: array
+      id:
+        example: 3042
+        type: integer
+      title:
+        type: string
+    type: object
   models.Parameter:
     properties:
       created_at:
@@ -37,6 +53,30 @@ definitions:
       title:
         type: string
       updated_at:
+        type: string
+    type: object
+  models.ParameterView:
+    properties:
+      allowed_classes:
+        example:
+        - 1
+        - 1033
+        - 3023
+        items:
+          type: integer
+        type: array
+      contradiction_parameters:
+        example:
+        - mob_inet
+        - fix_ctv
+        - voice_fix
+        items:
+          type: string
+        type: array
+      id:
+        example: fix_ctv
+        type: string
+      title:
         type: string
     type: object
   models.Service:
@@ -55,38 +95,6 @@ definitions:
         items:
           $ref: '#/definitions/models.Parameter'
         type: array
-      title:
-        type: string
-    type: object
-  services.ClassView:
-    properties:
-      allowed_parameters:
-        example:
-        - mob_inet
-        - fix_ctv
-        - voice_fix
-        items:
-          type: string
-        type: array
-      id:
-        example: 3042
-        type: integer
-      title:
-        type: string
-    type: object
-  services.ParameterView:
-    properties:
-      allowed_classes:
-        example:
-        - 1
-        - 1033
-        - 3023
-        items:
-          type: integer
-        type: array
-      id:
-        example: fix_ctv
-        type: string
       title:
         type: string
     type: object
@@ -147,7 +155,7 @@ paths:
         name: class
         required: true
         schema:
-          $ref: '#/definitions/services.ClassView'
+          $ref: '#/definitions/models.ClassView'
       produces:
       - application/json
       responses:
@@ -214,7 +222,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/services.ClassView'
+            $ref: '#/definitions/models.ClassView'
         "400":
           description: Bad Request
           schema:
@@ -251,7 +259,7 @@ paths:
         name: class
         required: true
         schema:
-          $ref: '#/definitions/services.ClassView'
+          $ref: '#/definitions/models.ClassView'
       produces:
       - application/json
       responses:
@@ -316,7 +324,7 @@ paths:
         name: parameter
         required: true
         schema:
-          $ref: '#/definitions/services.ParameterView'
+          $ref: '#/definitions/models.ParameterView'
       produces:
       - application/json
       responses:
@@ -381,7 +389,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/services.ParameterView'
+            $ref: '#/definitions/models.ParameterView'
         "500":
           description: Internal server error
           schema:
@@ -406,7 +414,7 @@ paths:
         name: parameter
         required: true
         schema:
-          $ref: '#/definitions/services.ParameterView'
+          $ref: '#/definitions/models.ParameterView'
       produces:
       - application/json
       responses:

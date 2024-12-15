@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"backend/internal/models"
-	"backend/internal/services"
 	"errors"
 	"net/http"
 	"strconv"
@@ -52,19 +51,25 @@ func (h *Handler) ListClasses(c *gin.Context) {
 //	@Tags			Classes
 //	@Accept			json
 //	@Produce		json
-//	@Param			class	body		services.ClassView	true	"Class details"
-//	@Success		201			{object}	models.Class
-//	@Failure		400			{object}	map[string]string	"Invalid input"
-//	@Failure		500			{object}	map[string]string	"Internal server error"
+//	@Param			class	body		models.ClassView	true	"Class details"
+//	@Success		201		{object}	models.Class
+//	@Failure		400		{object}	map[string]string	"Invalid input"
+//	@Failure		500		{object}	map[string]string	"Internal server error"
 //	@Router			/classes [post]
 func (h *Handler) CreateClass(c *gin.Context) {
-	var class services.ClassView
+	var class models.ClassView
 	if err := c.ShouldBindJSON(&class); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	created, err := h.ClassService.CreateClass(class)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = h.jenaService.AddClass(c, class)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -81,7 +86,7 @@ func (h *Handler) CreateClass(c *gin.Context) {
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path		int	true	"Class ID"
-//	@Success		200	{object}	services.ClassView
+//	@Success		200	{object}	models.ClassView
 //	@Failure		400	{object}	map[string]string
 //	@Failure		404	{object}	map[string]string
 //	@Failure		500	{object}	map[string]string
@@ -104,12 +109,16 @@ func (h *Handler) GetClassByID(c *gin.Context) {
 		return
 	}
 
-	//todo add rules from the knowledge base
+	constraints, err := h.jenaService.GetClassConstraints(c, class.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-	view := services.ClassView{
+	view := models.ClassView{
 		ID:                class.ID,
 		Title:             class.Title,
-		AllowedParameters: []string{"mob_inet", "fix_ctv", "voice_fix"},
+		AllowedParameters: constraints,
 	}
 
 	c.JSON(http.StatusOK, view)
@@ -122,11 +131,11 @@ func (h *Handler) GetClassByID(c *gin.Context) {
 //	@Tags			Classes
 //	@Accept			json
 //	@Produce		json
-//	@Param			id			path		int						true	"Class ID"
-//	@Param			class	body		services.ClassView	true	"Class details"
-//	@Success		200			{object}	models.Class
-//	@Failure		400			{object}	map[string]string	"Invalid input or class is used in services"
-//	@Failure		500			{object}	map[string]string	"Internal server error"
+//	@Param			id		path		int					true	"Class ID"
+//	@Param			class	body		models.ClassView	true	"Class details"
+//	@Success		200		{object}	models.Class
+//	@Failure		400		{object}	map[string]string	"Invalid input or class is used in services"
+//	@Failure		500		{object}	map[string]string	"Internal server error"
 //	@Router			/classes/{id} [put]
 func (h *Handler) UpdateClass(c *gin.Context) {
 	classID, err := strconv.Atoi(c.Param("id"))
@@ -135,7 +144,7 @@ func (h *Handler) UpdateClass(c *gin.Context) {
 		return
 	}
 
-	var class services.ClassView
+	var class models.ClassView
 	if err := c.ShouldBindJSON(&class); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -175,7 +184,11 @@ func (h *Handler) UpdateClass(c *gin.Context) {
 		}
 	}
 
-	//todo update class in the knowledge base
+	err = h.jenaService.UpdateClass(c, class)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusOK, model)
 }
@@ -214,7 +227,11 @@ func (h *Handler) DeleteClass(c *gin.Context) {
 		return
 	}
 
-	//todo remove class from the knowledge base
+	err = h.jenaService.DeleteClass(c, uint(classID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusNoContent, nil)
 }

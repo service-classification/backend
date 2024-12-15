@@ -27,3 +27,16 @@ type Class struct {
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdateAt  time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 }
+
+type ClassView struct {
+	ID                uint     `json:"id" example:"3042"`
+	Title             string   `json:"title"`
+	AllowedParameters []string `json:"allowed_parameters" example:"mob_inet,fix_ctv,voice_fix"`
+}
+
+type ParameterView struct {
+	ID                      string   `json:"id" example:"fix_ctv" required:"true,alphanum"`
+	Title                   string   `json:"title"`
+	AllowedClasses          []uint   `json:"allowed_classes" example:"1,1033,3023"`
+	ContradictionParameters []string `json:"contradiction_parameters" example:"mob_inet,fix_ctv,voice_fix"`
+}

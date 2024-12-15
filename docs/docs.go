@@ -93,7 +93,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/services.ClassView"
+                            "$ref": "#/definitions/models.ClassView"
                         }
                     }
                 ],
@@ -151,7 +151,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/services.ClassView"
+                            "$ref": "#/definitions/models.ClassView"
                         }
                     },
                     "400": {
@@ -209,7 +209,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/services.ClassView"
+                            "$ref": "#/definitions/models.ClassView"
                         }
                     }
                 ],
@@ -346,7 +346,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/services.ParameterView"
+                            "$ref": "#/definitions/models.ParameterView"
                         }
                     }
                 ],
@@ -401,7 +401,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/services.ParameterView"
+                            "$ref": "#/definitions/models.ParameterView"
                         }
                     },
                     "500": {
@@ -441,7 +441,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/services.ParameterView"
+                            "$ref": "#/definitions/models.ParameterView"
                         }
                     }
                 ],
@@ -849,6 +849,29 @@ const docTemplate = `{
                 }
             }
         },
+        "models.ClassView": {
+            "type": "object",
+            "properties": {
+                "allowed_parameters": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "mob_inet",
+                        "fix_ctv",
+                        "voice_fix"
+                    ]
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 3042
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Parameter": {
             "type": "object",
             "properties": {
@@ -862,6 +885,40 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ParameterView": {
+            "type": "object",
+            "properties": {
+                "allowed_classes": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    },
+                    "example": [
+                        1,
+                        1033,
+                        3023
+                    ]
+                },
+                "contradiction_parameters": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "mob_inet",
+                        "fix_ctv",
+                        "voice_fix"
+                    ]
+                },
+                "id": {
+                    "type": "string",
+                    "example": "fix_ctv"
+                },
+                "title": {
                     "type": "string"
                 }
             }
@@ -889,52 +946,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/models.Parameter"
                     }
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "services.ClassView": {
-            "type": "object",
-            "properties": {
-                "allowed_parameters": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        "mob_inet",
-                        "fix_ctv",
-                        "voice_fix"
-                    ]
-                },
-                "id": {
-                    "type": "integer",
-                    "example": 3042
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "services.ParameterView": {
-            "type": "object",
-            "properties": {
-                "allowed_classes": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    },
-                    "example": [
-                        1,
-                        1033,
-                        3023
-                    ]
-                },
-                "id": {
-                    "type": "string",
-                    "example": "fix_ctv"
                 },
                 "title": {
                     "type": "string"

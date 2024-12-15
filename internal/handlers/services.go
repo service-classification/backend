@@ -3,8 +3,11 @@ package handlers
 import (
 	"backend/internal/models"
 	"log"
+	"log/slog"
 	"net/http"
+	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -49,12 +52,20 @@ func (h *Handler) CreateService(c *gin.Context) {
 		Parameters: params,
 	}
 
+	invalidParameters, err := h.jenaService.ValidateService(c, service)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if len(invalidParameters) > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid parameters: " + strings.Join(invalidParameters, ", ")})
+		return
+	}
+
 	if err := h.ServiceRepo.Create(service); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	//todo classify the service
 
 	go func() {
 		payload := h.buildPayload(service.Parameters)
@@ -64,11 +75,23 @@ func (h *Handler) CreateService(c *gin.Context) {
 			return
 		}
 		if len(predictions) > 0 {
-			class, err := h.ClassRepo.GetByID(uint(predictions[0].ClassID))
+			classID := uint(predictions[0].ClassID)
+			correct, err := h.jenaService.ValidateClass(c, service, classID)
+			if err != nil {
+				log.Println("Error validating class:", err)
+				return
+			}
+			if !correct {
+				log.Println("Invalid class")
+				return
+			}
+
+			class, err := h.ClassRepo.GetByID(classID)
 			if err != nil {
 				log.Println("Class not found:", err)
 				return
 			}
+
 			service.Class = class
 			err = h.ServiceRepo.Update(service)
 			if err != nil {
@@ -138,12 +161,12 @@ type assignClassRequest struct {
 //	@Tags			Services
 //	@Accept			json
 //	@Produce		json
-//	@Param			id			path		int						true	"Service ID"
+//	@Param			id		path		int					true	"Service ID"
 //	@Param			class	body		assignClassRequest	true	"Class ID"
-//	@Success		200			{object}	models.Service
-//	@Failure		400			{object}	map[string]string	"Invalid input"
-//	@Failure		404			{object}	map[string]string	"Service or class not found"
-//	@Failure		500			{object}	map[string]string	"Internal server error"
+//	@Success		200		{object}	models.Service
+//	@Failure		400		{object}	map[string]string	"Invalid input"
+//	@Failure		404		{object}	map[string]string	"Service or class not found"
+//	@Failure		500		{object}	map[string]string	"Internal server error"
 //	@Router			/services/{id}/approve [post]
 func (h *Handler) ApproveService(c *gin.Context) {
 	serviceID, err := strconv.Atoi(c.Param("id"))
@@ -192,7 +215,11 @@ func (h *Handler) ApproveService(c *gin.Context) {
 		return
 	}
 
-	//todo add approved service to the knowledge base
+	err = h.jenaService.AddService(c, service)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusOK, service)
 }
@@ -222,14 +249,44 @@ func (h *Handler) ListProposedClasses(c *gin.Context) {
 		return
 	}
 
-	//todo find approved services with similar parameters
-	_ = service
-
-	classes, err := h.ClassRepo.List(0, 5)
+	classes, err := h.jenaService.ProposedClasses(c, service)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, classes)
+	result := make([]proposedClassResponse, 0, len(classes))
+	for _, class := range classes {
+		resp := proposedClassResponse{}
+
+		entityClass, err := h.ClassRepo.GetByID(class.ClassID)
+		if err != nil {
+			slog.Error("Category not found:", slog.Any("error", err))
+			continue
+		}
+		resp.ClassID = entityClass.ID
+		resp.Title = entityClass.Title
+
+		resp.SimilarParameters = class.MatchingParameterNums
+		resp.SimilarServices = len(class.SimilarServices)
+
+		result = append(result, resp)
+	}
+
+	// sort result first by similar services and then by similar parameters
+	sort.Slice(result, func(i, j int) bool {
+		if result[i].SimilarServices == result[j].SimilarServices {
+			return result[i].SimilarParameters > result[j].SimilarParameters
+		}
+		return result[i].SimilarServices > result[j].SimilarServices
+	})
+
+	c.JSON(http.StatusOK, result)
+}
+
+type proposedClassResponse struct {
+	ClassID           uint   `json:"class_id"`
+	Title             string `json:"title"`
+	SimilarParameters int    `json:"similar_parameters"`
+	SimilarServices   int    `json:"similar_services"`
 }

@@ -35,6 +35,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      kb:
+        condition: service_healthy
     ports:
       - "8080:8080"
     environment:
@@ -47,8 +49,48 @@ services:
       BEARER_TOKEN: your_secure_token
 #      PUBLIC_HOST: 194.135.25.202
       PUBLIC_HOST: localhost
+      KB_HOST: kb
+      KB_PORT: 3030
+      KB_DATASET: service-classification
+      KB_LOGIN: admin
+      KB_PASSWORD: serviceclassification
     networks:
       - app-network
+
+  kb:
+    image: stain/jena-fuseki
+    ports:
+      - "3030:3030"
+    environment:
+      ADMIN_PASSWORD: serviceclassification
+      FUSEKI_DATASET_1: service-classification
+      JVM_ARGS: -Xmx512M
+      TDB: 2
+    volumes:
+      - kb-data:/fuseki
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:3030/$$/ping" ]
+    depends_on:
+      kb-migration:
+        condition: service_completed_successfully
+
+  kb-migration:
+    image: stain/jena-fuseki
+    environment:
+      ADMIN_PASSWORD: serviceclassification
+      FUSEKI_DATASET_1: service-classification
+      JVM_ARGS: -Xmx512M
+      TDB: 2
+    volumes:
+      - type: bind
+        source: ./rdf_migrations
+        target: /staging
+      - kb-data:/fuseki
+    entrypoint: ["/jena-fuseki/tdbloader2", "--loc", "/fuseki/databases/service-classification",  "/staging/service-classification.ttl"]
+    restart: "no"
+
+volumes:
+  kb-data:
 
 networks:
   app-network:

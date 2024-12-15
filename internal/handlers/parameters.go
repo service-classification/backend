@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"backend/internal/models"
-	"backend/internal/services"
 	"net/http"
 	"strconv"
 
@@ -40,13 +39,13 @@ func (h *Handler) ListParameters(c *gin.Context) {
 //	@Tags			Parameters
 //	@Accept			json
 //	@Produce		json
-//	@Param			parameter	body		services.ParameterView	true	"Parameter details"
+//	@Param			parameter	body		models.ParameterView	true	"Parameter details"
 //	@Success		201			{object}	models.Parameter
 //	@Failure		400			{object}	map[string]string	"Invalid input"
 //	@Failure		500			{object}	map[string]string	"Internal server error"
 //	@Router			/parameters [post]
 func (h *Handler) CreateParameter(c *gin.Context) {
-	var parameter services.ParameterView
+	var parameter models.ParameterView
 	if err := c.ShouldBindJSON(&parameter); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -68,7 +67,7 @@ func (h *Handler) CreateParameter(c *gin.Context) {
 //	@Tags			Parameters
 //	@Produce		json
 //	@Param			id	path		string	true	"Parameter ID"
-//	@Success		200	{object}	services.ParameterView
+//	@Success		200	{object}	models.ParameterView
 //	@Failure		500	{object}	map[string]string	"Internal server error"
 //	@Router			/parameters/{id} [get]
 func (h *Handler) GetParameterByID(context *gin.Context) {
@@ -80,12 +79,17 @@ func (h *Handler) GetParameterByID(context *gin.Context) {
 		return
 	}
 
-	//todo add rules from the knowledge base
+	classes, contradictParams, err := h.jenaService.GetParameterConstraints(context, parameterID)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-	view := services.ParameterView{
-		ID:             parameter.ID,
-		Title:          parameter.Title,
-		AllowedClasses: []int{1, 1033, 3023},
+	view := models.ParameterView{
+		ID:                      parameter.ID,
+		Title:                   parameter.Title,
+		AllowedClasses:          classes,
+		ContradictionParameters: contradictParams,
 	}
 
 	context.JSON(http.StatusOK, view)
@@ -99,7 +103,7 @@ func (h *Handler) GetParameterByID(context *gin.Context) {
 //	@Accept			json
 //	@Produce		json
 //	@Param			id			path		string					true	"Parameter ID"
-//	@Param			parameter	body		services.ParameterView	true	"Parameter details"
+//	@Param			parameter	body		models.ParameterView	true	"Parameter details"
 //	@Success		200			{object}	models.Parameter
 //	@Failure		400			{object}	map[string]string	"Invalid input or parameter is used in services"
 //	@Failure		500			{object}	map[string]string	"Internal server error"
@@ -107,7 +111,7 @@ func (h *Handler) GetParameterByID(context *gin.Context) {
 func (h *Handler) UpdateParameter(c *gin.Context) {
 	parameterID := c.Param("id")
 
-	var parameter services.ParameterView
+	var parameter models.ParameterView
 	if err := c.ShouldBindJSON(&parameter); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -146,7 +150,11 @@ func (h *Handler) UpdateParameter(c *gin.Context) {
 		}
 	}
 
-	//todo update parameter in the knowledge base
+	err = h.jenaService.UpdateParameter(c, parameter)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusOK, model)
 }
@@ -181,7 +189,11 @@ func (h *Handler) DeleteParameter(c *gin.Context) {
 		return
 	}
 
-	//todo delete parameter from the knowledge base
+	err = h.jenaService.DeleteParameter(c, parameterID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusNoContent, nil)
 }
