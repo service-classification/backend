@@ -19,10 +19,11 @@ func NewParameterService(parameterRepo repositories.ParameterRepository, service
 	}
 }
 
-func (s *ParameterService) CreateParameter(parameter models.ParameterView) (*models.Parameter, error) {
+func (s *ParameterService) CreateParameter(parameter models.ParameterView, new bool) (*models.Parameter, error) {
 	model := &models.Parameter{
 		ID:    parameter.ID,
 		Title: parameter.Title,
+		New:   new,
 	}
 	err := s.ParameterRepository.Create(model)
 	if err != nil {

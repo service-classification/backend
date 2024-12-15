@@ -7,6 +7,7 @@ import (
 type Parameter struct {
 	ID        string    `gorm:"primaryKey" json:"id"`
 	Title     string    `json:"title"`
+	New       bool      `json:"new"`
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdateAt  time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 }
@@ -24,6 +25,7 @@ type Service struct {
 type Class struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	Title     string    `json:"title"`
+	New       bool      `json:"new"`
 	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdateAt  time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 }

@@ -19,10 +19,11 @@ func NewClassService(classRepository repositories.ClassRepository, service *apac
 	}
 }
 
-func (s *ClassService) CreateClass(classView models.ClassView) (*models.Class, error) {
+func (s *ClassService) CreateClass(classView models.ClassView, new bool) (*models.Class, error) {
 	model := &models.Class{
 		ID:    classView.ID,
 		Title: classView.Title,
+		New:   new,
 	}
 	err := s.ClassRepository.Create(model)
 	if err != nil {

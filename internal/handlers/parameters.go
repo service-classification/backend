@@ -51,7 +51,7 @@ func (h *Handler) CreateParameter(c *gin.Context) {
 		return
 	}
 
-	created, err := h.ParameterService.CreateParameter(parameter)
+	created, err := h.ParameterService.CreateParameter(parameter, true)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

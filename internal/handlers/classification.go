@@ -5,55 +5,23 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"time"
 )
 
 // Helper functions
-func (h *Handler) buildPayload(parameters []models.Parameter) map[string]int {
-	// from list filter only allowed parameters:
-	payload := map[string]int{
-		"mob_inet":                0,
-		"fix_inet":                0,
-		"fix_ctv":                 0,
-		"fix_ictv":                0,
-		"voice_mob":               0,
-		"voice_fix":               0,
-		"sms":                     0,
-		"csd":                     0,
-		"iot":                     0,
-		"mms":                     0,
-		"roaming":                 0,
-		"mg":                      0,
-		"mn":                      0,
-		"mts":                     0,
-		"conc":                    0,
-		"fix_op":                  0,
-		"vsr_roam":                0,
-		"national_roam":           0,
-		"mn_roam":                 0,
-		"voice_ap":                0,
-		"voice_fee":               0,
-		"period_service":          0,
-		"one_time_service":        0,
-		"dop_service":             0,
-		"content":                 0,
-		"services_service":        0,
-		"keo_sale":                0,
-		"discount":                0,
-		"only_inbound":            0,
-		"sms_a2p":                 0,
-		"sms_gross":               0,
-		"skoring":                 0,
-		"other_service":           0,
-		"voice_mail":              0,
-		"geo":                     0,
-		"ep_for_number":           0,
-		"ep_for_line":             0,
-		"one_time_fee_for_number": 0,
-		"equipment rent":          0,
-		"add_package":             0,
+func (h *Handler) buildPayload(parameters []models.Parameter) (map[string]int, error) {
+	supportedParams, err := h.ParameterRepo.ListSupportedParameters()
+	if err != nil {
+		return nil, err
+	}
+
+	payload := make(map[string]int, len(supportedParams))
+	for _, param := range supportedParams {
+		payload[param] = 0
 	}
 
 	for _, param := range parameters {
@@ -61,12 +29,17 @@ func (h *Handler) buildPayload(parameters []models.Parameter) map[string]int {
 			payload[param.ID] = 1
 		}
 	}
-	return payload
+	return payload, nil
 }
 
-func callMLModel(payload map[string]int) ([]Prediction, error) {
-	url := os.Getenv("ML_MODEL_URL")   // todo from config
-	token := os.Getenv("BEARER_TOKEN") // todo from config
+func (h *Handler) callMLModel(parameters []models.Parameter) ([]Prediction, error) {
+	payload, err := h.buildPayload(parameters)
+	if err != nil {
+		return nil, fmt.Errorf("failed to build payload: %w", err)
+	}
+
+	url := os.Getenv("ML_MODEL_URL")
+	token := os.Getenv("BEARER_TOKEN")
 
 	jsonData, err := json.Marshal(payload)
 	if err != nil {
@@ -80,7 +53,9 @@ func callMLModel(payload map[string]int) ([]Prediction, error) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+token)
 
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err

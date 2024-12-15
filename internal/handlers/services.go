@@ -68,8 +68,7 @@ func (h *Handler) CreateService(c *gin.Context) {
 	}
 
 	go func() {
-		payload := h.buildPayload(service.Parameters)
-		predictions, err := callMLModel(payload)
+		predictions, err := h.callMLModel(service.Parameters)
 		if err != nil {
 			log.Println("Error calling ML model:", err)
 			return

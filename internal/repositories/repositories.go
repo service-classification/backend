@@ -120,6 +120,7 @@ type ParameterRepository interface {
 	Delete(code string) error
 	GetByID(code string) (*models.Parameter, error)
 	List(offset, limit int) ([]models.Parameter, error)
+	ListSupportedParameters() ([]string, error)
 }
 
 type parameterRepository struct {
@@ -151,5 +152,11 @@ func (r *parameterRepository) GetByID(code string) (*models.Parameter, error) {
 func (r *parameterRepository) List(offset, limit int) ([]models.Parameter, error) {
 	var parameters []models.Parameter
 	err := r.db.Offset(offset).Limit(limit).Find(&parameters).Error
+	return parameters, err
+}
+
+func (r *parameterRepository) ListSupportedParameters() ([]string, error) {
+	var parameters []string
+	err := r.db.Model(&models.Parameter{}).Where("new = false").Pluck("id", &parameters).Error
 	return parameters, err
 }
