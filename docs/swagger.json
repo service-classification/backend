@@ -767,7 +767,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Class"
+                                "$ref": "#/definitions/handlers.proposedClassResponse"
                             }
                         }
                     },
@@ -829,6 +829,23 @@
                 }
             }
         },
+        "handlers.proposedClassResponse": {
+            "type": "object",
+            "properties": {
+                "class_id": {
+                    "type": "integer"
+                },
+                "similar_parameters": {
+                    "type": "integer"
+                },
+                "similar_services": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Class": {
             "type": "object",
             "properties": {
@@ -837,6 +854,9 @@
                 },
                 "id": {
                     "type": "integer"
+                },
+                "new": {
+                    "type": "boolean"
                 },
                 "title": {
                     "type": "string"
@@ -877,6 +897,9 @@
                 },
                 "id": {
                     "type": "string"
+                },
+                "new": {
+                    "type": "boolean"
                 },
                 "title": {
                     "type": "string"

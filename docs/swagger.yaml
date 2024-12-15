@@ -17,12 +17,25 @@ definitions:
       class_id:
         type: integer
     type: object
+  handlers.proposedClassResponse:
+    properties:
+      class_id:
+        type: integer
+      similar_parameters:
+        type: integer
+      similar_services:
+        type: integer
+      title:
+        type: string
+    type: object
   models.Class:
     properties:
       created_at:
         type: string
       id:
         type: integer
+      new:
+        type: boolean
       title:
         type: string
       updated_at:
@@ -50,6 +63,8 @@ definitions:
         type: string
       id:
         type: string
+      new:
+        type: boolean
       title:
         type: string
       updated_at:
@@ -610,7 +625,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.Class'
+              $ref: '#/definitions/handlers.proposedClassResponse'
             type: array
         "400":
           description: Invalid service ID

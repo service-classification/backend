@@ -234,7 +234,7 @@ func (h *Handler) ApproveService(c *gin.Context) {
 //	@Tags			Services
 //	@Produce		json
 //	@Param			id	path		int	true	"Service ID"
-//	@Success		200	{array}		models.Class
+//	@Success		200	{array}		proposedClassResponse
 //	@Failure		400	{object}	map[string]string	"Invalid service ID"
 //	@Failure		404	{object}	map[string]string	"Service not found"
 //	@Failure		500	{object}	map[string]string	"Internal server error"

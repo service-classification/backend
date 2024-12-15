@@ -770,7 +770,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Class"
+                                "$ref": "#/definitions/handlers.proposedClassResponse"
                             }
                         }
                     },
@@ -832,6 +832,23 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.proposedClassResponse": {
+            "type": "object",
+            "properties": {
+                "class_id": {
+                    "type": "integer"
+                },
+                "similar_parameters": {
+                    "type": "integer"
+                },
+                "similar_services": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Class": {
             "type": "object",
             "properties": {
@@ -840,6 +857,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "new": {
+                    "type": "boolean"
                 },
                 "title": {
                     "type": "string"
@@ -880,6 +900,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
+                },
+                "new": {
+                    "type": "boolean"
                 },
                 "title": {
                     "type": "string"
