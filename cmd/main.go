@@ -106,8 +106,10 @@ func migrate(classService *services.ClassService, parameterService *services.Par
 	err = errors.Join(err, second(parameterService.CreateParameter(models.ParameterView{Title: "Geoanalytics services (subscriber clustering, etc.)", ID: "geo"}, false)))
 	err = errors.Join(err, second(parameterService.CreateParameter(models.ParameterView{Title: "Fixed telephony services, monthly fee per number", ID: "ep_for_number"}, false)))
 	err = errors.Join(err, second(parameterService.CreateParameter(models.ParameterView{Title: "Fixed telephony services, one-time fee per line", ID: "ep_for_line"}, false)))
-	err = errors.Join(err, second(parameterService.CreateParameter(models.ParameterView{Title: "Fixed telephony services, one-time fee per number", ID: "onetime_fee_for_number"}, false)))
+	err = errors.Join(err, second(parameterService.CreateParameter(models.ParameterView{Title: "Fixed telephony services, one-time fee per number", ID: "one_time_fee_for_number"}, false)))
 	err = errors.Join(err, second(parameterService.CreateParameter(models.ParameterView{Title: "Fixed communication services, equipment rental", ID: "equipment_rent"}, false)))
+	err = errors.Join(err, second(parameterService.CreateParameter(models.ParameterView{Title: "Scoring", ID: "skoring"}, false)))
+	err = errors.Join(err, second(parameterService.CreateParameter(models.ParameterView{Title: "Additional package", ID: "add_package"}, false)))
 
 	err = errors.Join(err, second(classService.CreateClass(models.ClassView{ID: 1, Title: "Subscription fee", AllowedParameters: []string{"mg", "voice_ap", "period_service", "one_time_service"}}, false)))
 	err = errors.Join(err, second(classService.CreateClass(models.ClassView{ID: 4, Title: "Long-distance communication", AllowedParameters: []string{"voice_mob", "mg", "period_service", "one_time_service"}}, false)))

@@ -74,6 +74,10 @@ func (h *Handler) CreateService(c *gin.Context) {
 			return
 		}
 		if len(predictions) > 0 {
+			if predictions[0].Probability <= 0.7 {
+				slog.Warn("Low probability:", slog.Any("probability", predictions[0].Probability))
+			}
+
 			classID := uint(predictions[0].ClassID)
 			correct, err := h.jenaService.ValidateClass(c, service, classID)
 			if err != nil {
