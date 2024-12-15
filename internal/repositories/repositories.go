@@ -13,7 +13,7 @@ type ServiceRepository interface {
 	GetByID(id uint) (*models.Service, error)
 	List(offset, limit int) ([]models.Service, error)
 	FindByParameterID(parameterID string) ([]models.Service, error)
-	FindByGroupID(id uint) ([]models.Service, error)
+	FindByClassID(id uint) ([]models.Service, error)
 }
 
 type serviceRepository struct {
@@ -38,14 +38,14 @@ func (r *serviceRepository) Delete(id uint) error {
 
 func (r *serviceRepository) GetByID(id uint) (*models.Service, error) {
 	var service models.Service
-	err := r.db.Preload("Parameters").Preload("Group").First(&service, id).Error
+	err := r.db.Preload("Parameters").Preload("Class").First(&service, id).Error
 	return &service, err
 }
 
 func (r *serviceRepository) List(offset, limit int) ([]models.Service, error) {
 	var services []models.Service
 	err := r.db.
-		Preload("Group").
+		Preload("Class").
 		Offset(offset).
 		Limit(limit).
 		Order("approved_at IS NOT NULL, approved_at DESC").
@@ -65,53 +65,53 @@ func (r *serviceRepository) FindByParameterID(parameterID string) ([]models.Serv
 	return services, err
 }
 
-func (r *serviceRepository) FindByGroupID(id uint) ([]models.Service, error) {
+func (r *serviceRepository) FindByClassID(id uint) ([]models.Service, error) {
 	var services []models.Service
 	err := r.db.
-		Preload("Group").
-		Where("group_id = ?", id).
+		Preload("Class").
+		Where("class_id = ?", id).
 		Find(&services).Error
 	return services, err
 }
 
-type GroupRepository interface {
-	GetByID(id uint) (*models.Group, error)
-	List(offset, limit int) ([]models.Group, error)
-	Update(group *models.Group) error
-	Create(group *models.Group) error
+type ClassRepository interface {
+	GetByID(id uint) (*models.Class, error)
+	List(offset, limit int) ([]models.Class, error)
+	Update(class *models.Class) error
+	Create(class *models.Class) error
 	Delete(u uint) error
 }
 
-type groupRepository struct {
+type classRepository struct {
 	db *gorm.DB
 }
 
-func NewGroupRepository(db *gorm.DB) GroupRepository {
-	return &groupRepository{db}
+func NewClassRepository(db *gorm.DB) ClassRepository {
+	return &classRepository{db}
 }
 
-func (r *groupRepository) GetByID(id uint) (*models.Group, error) {
-	var group models.Group
-	err := r.db.First(&group, id).Error
-	return &group, err
+func (r *classRepository) GetByID(id uint) (*models.Class, error) {
+	var class models.Class
+	err := r.db.First(&class, id).Error
+	return &class, err
 }
 
-func (r *groupRepository) List(offset, limit int) ([]models.Group, error) {
-	var groups []models.Group
-	err := r.db.Offset(offset).Limit(limit).Find(&groups).Error
-	return groups, err
+func (r *classRepository) List(offset, limit int) ([]models.Class, error) {
+	var classes []models.Class
+	err := r.db.Offset(offset).Limit(limit).Find(&classes).Error
+	return classes, err
 }
 
-func (r *groupRepository) Create(group *models.Group) error {
-	return r.db.Create(group).Error
+func (r *classRepository) Create(class *models.Class) error {
+	return r.db.Create(class).Error
 }
 
-func (r *groupRepository) Update(group *models.Group) error {
-	return r.db.Save(group).Error
+func (r *classRepository) Update(class *models.Class) error {
+	return r.db.Save(class).Error
 }
 
-func (r *groupRepository) Delete(u uint) error {
-	return r.db.Delete(&models.Group{}, u).Error
+func (r *classRepository) Delete(u uint) error {
+	return r.db.Delete(&models.Class{}, u).Error
 }
 
 type ParameterRepository interface {

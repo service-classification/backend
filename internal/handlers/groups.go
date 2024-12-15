@@ -11,20 +11,20 @@ import (
 	"gorm.io/gorm"
 )
 
-// ListGroups godoc
+// ListClasses godoc
 //
-//	@Summary		List groups with pagination
-//	@Description	Retrieves a list of groups with pagination.
-//	@Tags			Groups
+//	@Summary		List classes with pagination
+//	@Description	Retrieves a list of classes with pagination.
+//	@Tags			Classes
 //	@Accept			json
 //	@Produce		json
 //	@Param			offset	query		int	false	"Offset"	default(0)
 //	@Param			limit	query		int	false	"Limit"		default(10)
-//	@Success		200		{array}		models.Group
+//	@Success		200		{array}		models.Class
 //	@Failure		400		{object}	map[string]string
 //	@Failure		500		{object}	map[string]string
-//	@Router			/groups [get]
-func (h *Handler) ListGroups(c *gin.Context) {
+//	@Router			/classes [get]
+func (h *Handler) ListClasses(c *gin.Context) {
 	offset, err := strconv.Atoi(c.DefaultQuery("offset", "0"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid offset"})
@@ -36,35 +36,35 @@ func (h *Handler) ListGroups(c *gin.Context) {
 		return
 	}
 
-	groups, err := h.GroupRepo.List(offset, limit)
+	classes, err := h.ClassRepo.List(offset, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, groups)
+	c.JSON(http.StatusOK, classes)
 }
 
-// CreateGroup godoc
+// CreateClass godoc
 //
-//	@Summary		Create a new group
-//	@Description	Creates a new group with the provided details.
-//	@Tags			Groups
+//	@Summary		Create a new class
+//	@Description	Creates a new class with the provided details.
+//	@Tags			Classes
 //	@Accept			json
 //	@Produce		json
-//	@Param			group	body		services.GroupView	true	"Group details"
-//	@Success		201		{object}	models.Group
-//	@Failure		400		{object}	map[string]string	"Invalid input"
-//	@Failure		500		{object}	map[string]string	"Internal server error"
-//	@Router			/groups [post]
-func (h *Handler) CreateGroup(c *gin.Context) {
-	var group services.GroupView
-	if err := c.ShouldBindJSON(&group); err != nil {
+//	@Param			class	body		services.ClassView	true	"Class details"
+//	@Success		201			{object}	models.Class
+//	@Failure		400			{object}	map[string]string	"Invalid input"
+//	@Failure		500			{object}	map[string]string	"Internal server error"
+//	@Router			/classes [post]
+func (h *Handler) CreateClass(c *gin.Context) {
+	var class services.ClassView
+	if err := c.ShouldBindJSON(&class); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	created, err := h.GroupService.CreateGroup(group)
+	created, err := h.ClassService.CreateClass(class)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -73,31 +73,31 @@ func (h *Handler) CreateGroup(c *gin.Context) {
 	c.JSON(http.StatusCreated, created)
 }
 
-// GetGroupByID godoc
+// GetClassByID godoc
 //
-//	@Summary		Get a group by ID
-//	@Description	Retrieves a group by its ID.
-//	@Tags			Groups
+//	@Summary		Get a class by ID
+//	@Description	Retrieves a class by its ID.
+//	@Tags			Classes
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path		int	true	"Group ID"
-//	@Success		200	{object}	services.GroupView
+//	@Param			id	path		int	true	"Class ID"
+//	@Success		200	{object}	services.ClassView
 //	@Failure		400	{object}	map[string]string
 //	@Failure		404	{object}	map[string]string
 //	@Failure		500	{object}	map[string]string
-//	@Router			/groups/{id} [get]
-func (h *Handler) GetGroupByID(c *gin.Context) {
+//	@Router			/classes/{id} [get]
+func (h *Handler) GetClassByID(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid group ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid class ID"})
 		return
 	}
 
-	group, err := h.GroupRepo.GetByID(uint(id))
+	class, err := h.ClassRepo.GetByID(uint(id))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Group not found"})
+			c.JSON(http.StatusNotFound, gin.H{"error": "Class not found"})
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
@@ -106,115 +106,115 @@ func (h *Handler) GetGroupByID(c *gin.Context) {
 
 	//todo add rules from the knowledge base
 
-	view := services.GroupView{
-		ID:                group.ID,
-		Title:             group.Title,
+	view := services.ClassView{
+		ID:                class.ID,
+		Title:             class.Title,
 		AllowedParameters: []string{"mob_inet", "fix_ctv", "voice_fix"},
 	}
 
 	c.JSON(http.StatusOK, view)
 }
 
-// UpdateGroup godoc
+// UpdateClass godoc
 //
-//	@Summary		Update an existing group
-//	@Description	Updates the details of an existing group.
-//	@Tags			Groups
+//	@Summary		Update an existing class
+//	@Description	Updates the details of an existing class.
+//	@Tags			Classes
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		int					true	"Group ID"
-//	@Param			group	body		services.GroupView	true	"Group details"
-//	@Success		200		{object}	models.Group
-//	@Failure		400		{object}	map[string]string	"Invalid input or group is used in services"
-//	@Failure		500		{object}	map[string]string	"Internal server error"
-//	@Router			/groups/{id} [put]
-func (h *Handler) UpdateGroup(c *gin.Context) {
-	groupID, err := strconv.Atoi(c.Param("id"))
+//	@Param			id			path		int						true	"Class ID"
+//	@Param			class	body		services.ClassView	true	"Class details"
+//	@Success		200			{object}	models.Class
+//	@Failure		400			{object}	map[string]string	"Invalid input or class is used in services"
+//	@Failure		500			{object}	map[string]string	"Internal server error"
+//	@Router			/classes/{id} [put]
+func (h *Handler) UpdateClass(c *gin.Context) {
+	classID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid group ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid class ID"})
 		return
 	}
 
-	var group services.GroupView
-	if err := c.ShouldBindJSON(&group); err != nil {
+	var class services.ClassView
+	if err := c.ShouldBindJSON(&class); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// check if exist any service with this group
+	// check if exist any service with this class
 	// if exist return error
-	services, err := h.ServiceRepo.FindByGroupID(uint(groupID))
+	services, err := h.ServiceRepo.FindByClassID(uint(classID))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	if len(services) > 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Group is used in services"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Class is used in services"})
 		return
 	}
 
-	model := &models.Group{
-		ID:    group.ID,
-		Title: group.Title,
+	model := &models.Class{
+		ID:    class.ID,
+		Title: class.Title,
 	}
-	if uint(groupID) != group.ID {
-		err := h.GroupRepo.Delete(uint(groupID))
+	if uint(classID) != class.ID {
+		err := h.ClassRepo.Delete(uint(classID))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		err = h.GroupRepo.Create(model)
+		err = h.ClassRepo.Create(model)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 	} else {
-		if err := h.GroupRepo.Update(model); err != nil {
+		if err := h.ClassRepo.Update(model); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 	}
 
-	//todo update group in the knowledge base
+	//todo update class in the knowledge base
 
 	c.JSON(http.StatusOK, model)
 }
 
-// DeleteGroup godoc
+// DeleteClass godoc
 //
-//	@Summary		Delete a group
-//	@Description	Deletes a group by its ID. If the group is used in any services, it returns an error.
-//	@Tags			Groups
-//	@Param			id	path	int	true	"Group ID"
-//	@Success		204	"Group deleted successfully"
-//	@Failure		400	{object}	map[string]string	"Group is used in services"
+//	@Summary		Delete a class
+//	@Description	Deletes a class by its ID. If the class is used in any services, it returns an error.
+//	@Tags			Classes
+//	@Param			id	path	int	true	"Class ID"
+//	@Success		204	"Class deleted successfully"
+//	@Failure		400	{object}	map[string]string	"Class is used in services"
 //	@Failure		500	{object}	map[string]string	"Internal server error"
-//	@Router			/groups/{id} [delete]
-func (h *Handler) DeleteGroup(c *gin.Context) {
-	groupID, err := strconv.Atoi(c.Param("id"))
+//	@Router			/classes/{id} [delete]
+func (h *Handler) DeleteClass(c *gin.Context) {
+	classID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid group ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid class ID"})
 		return
 	}
 
-	// check if exist any service with this group
+	// check if exist any service with this class
 	// if exist return error
-	services, err := h.ServiceRepo.FindByGroupID(uint(groupID))
+	services, err := h.ServiceRepo.FindByClassID(uint(classID))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	if len(services) > 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Group is used in services"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Class is used in services"})
 		return
 	}
 
-	if err := h.GroupRepo.Delete(uint(groupID)); err != nil {
+	if err := h.ClassRepo.Delete(uint(classID)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	//todo remove group from the knowledge base
+	//todo remove class from the knowledge base
 
 	c.JSON(http.StatusNoContent, nil)
 }

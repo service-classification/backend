@@ -5,33 +5,33 @@ import (
 	"backend/internal/repositories"
 )
 
-type GroupService struct {
-	GroupRepository repositories.GroupRepository
+type ClassService struct {
+	ClassRepository repositories.ClassRepository
 }
 
-func NewGroupService(groupRepo repositories.GroupRepository) *GroupService {
-	return &GroupService{
-		GroupRepository: groupRepo,
+func NewClassService(classRepository repositories.ClassRepository) *ClassService {
+	return &ClassService{
+		ClassRepository: classRepository,
 	}
 }
 
-type GroupView struct {
+type ClassView struct {
 	ID                uint     `json:"id" example:"3042"`
 	Title             string   `json:"title"`
 	AllowedParameters []string `json:"allowed_parameters" example:"mob_inet,fix_ctv,voice_fix"`
 }
 
-func (s *GroupService) CreateGroup(group GroupView) (*models.Group, error) {
-	model := &models.Group{
-		ID:    group.ID,
-		Title: group.Title,
+func (s *ClassService) CreateClass(classView ClassView) (*models.Class, error) {
+	model := &models.Class{
+		ID:    classView.ID,
+		Title: classView.Title,
 	}
-	err := s.GroupRepository.Create(model)
+	err := s.ClassRepository.Create(model)
 	if err != nil {
 		return model, err
 	}
 
-	//todo add new group to the knowledge base
+	//todo add new class to the knowledge base
 
 	return model, nil
 }

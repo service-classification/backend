@@ -15,9 +15,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/groups": {
+        "/classes": {
             "get": {
-                "description": "Retrieves a list of groups with pagination.",
+                "description": "Retrieves a list of classes with pagination.",
                 "consumes": [
                     "application/json"
                 ],
@@ -25,9 +25,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Groups"
+                    "Classes"
                 ],
-                "summary": "List groups with pagination",
+                "summary": "List classes with pagination",
                 "parameters": [
                     {
                         "type": "integer",
@@ -50,7 +50,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Group"
+                                "$ref": "#/definitions/models.Class"
                             }
                         }
                     },
@@ -75,7 +75,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Creates a new group with the provided details.",
+                "description": "Creates a new class with the provided details.",
                 "consumes": [
                     "application/json"
                 ],
@@ -83,17 +83,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Groups"
+                    "Classes"
                 ],
-                "summary": "Create a new group",
+                "summary": "Create a new class",
                 "parameters": [
                     {
-                        "description": "Group details",
-                        "name": "group",
+                        "description": "Class details",
+                        "name": "class",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/services.GroupView"
+                            "$ref": "#/definitions/services.ClassView"
                         }
                     }
                 ],
@@ -101,7 +101,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Group"
+                            "$ref": "#/definitions/models.Class"
                         }
                     },
                     "400": {
@@ -125,9 +125,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/groups/{id}": {
+        "/classes/{id}": {
             "get": {
-                "description": "Retrieves a group by its ID.",
+                "description": "Retrieves a class by its ID.",
                 "consumes": [
                     "application/json"
                 ],
@@ -135,13 +135,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Groups"
+                    "Classes"
                 ],
-                "summary": "Get a group by ID",
+                "summary": "Get a class by ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Group ID",
+                        "description": "Class ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -151,7 +151,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/services.GroupView"
+                            "$ref": "#/definitions/services.ClassView"
                         }
                     },
                     "400": {
@@ -184,7 +184,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Updates the details of an existing group.",
+                "description": "Updates the details of an existing class.",
                 "consumes": [
                     "application/json"
                 ],
@@ -192,24 +192,24 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Groups"
+                    "Classes"
                 ],
-                "summary": "Update an existing group",
+                "summary": "Update an existing class",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Group ID",
+                        "description": "Class ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Group details",
-                        "name": "group",
+                        "description": "Class details",
+                        "name": "class",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/services.GroupView"
+                            "$ref": "#/definitions/services.ClassView"
                         }
                     }
                 ],
@@ -217,11 +217,11 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Group"
+                            "$ref": "#/definitions/models.Class"
                         }
                     },
                     "400": {
-                        "description": "Invalid input or group is used in services",
+                        "description": "Invalid input or class is used in services",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -241,15 +241,15 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Deletes a group by its ID. If the group is used in any services, it returns an error.",
+                "description": "Deletes a class by its ID. If the class is used in any services, it returns an error.",
                 "tags": [
-                    "Groups"
+                    "Classes"
                 ],
-                "summary": "Delete a group",
+                "summary": "Delete a class",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Group ID",
+                        "description": "Class ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -257,10 +257,10 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "Group deleted successfully"
+                        "description": "Class deleted successfully"
                     },
                     "400": {
-                        "description": "Group is used in services",
+                        "description": "Class is used in services",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -679,7 +679,7 @@ const docTemplate = `{
         },
         "/services/{id}/approve": {
             "post": {
-                "description": "Approves a service by its ID. If a group ID is provided in the request body, it assigns the group to the service before approval.",
+                "description": "Approves a service by its ID. If a class ID is provided in the request body, it assigns the class to the service before approval.",
                 "consumes": [
                     "application/json"
                 ],
@@ -699,12 +699,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Group ID",
-                        "name": "group",
+                        "description": "Class ID",
+                        "name": "class",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.assignGroupRequest"
+                            "$ref": "#/definitions/handlers.assignClassRequest"
                         }
                     }
                 ],
@@ -725,7 +725,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Service or group not found",
+                        "description": "Service or class not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -745,16 +745,16 @@ const docTemplate = `{
                 }
             }
         },
-        "/services/{id}/proposed_groups": {
+        "/services/{id}/proposed_classes": {
             "get": {
-                "description": "Fetches a list of proposed groups for a service based on similar parameters.",
+                "description": "Fetches a list of proposed classes for a service based on similar parameters.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Services"
                 ],
-                "summary": "List proposed groups for a service",
+                "summary": "List proposed classes for a service",
                 "parameters": [
                     {
                         "type": "integer",
@@ -770,7 +770,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Group"
+                                "$ref": "#/definitions/models.Class"
                             }
                         }
                     },
@@ -824,15 +824,15 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.assignGroupRequest": {
+        "handlers.assignClassRequest": {
             "type": "object",
             "properties": {
-                "group_id": {
+                "class_id": {
                     "type": "integer"
                 }
             }
         },
-        "models.Group": {
+        "models.Class": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -872,14 +872,14 @@ const docTemplate = `{
                 "approved_at": {
                     "type": "string"
                 },
+                "class": {
+                    "$ref": "#/definitions/models.Class"
+                },
+                "class_id": {
+                    "type": "integer"
+                },
                 "created_at": {
                     "type": "string"
-                },
-                "group": {
-                    "$ref": "#/definitions/models.Group"
-                },
-                "group_id": {
-                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -895,7 +895,7 @@ const docTemplate = `{
                 }
             }
         },
-        "services.GroupView": {
+        "services.ClassView": {
             "type": "object",
             "properties": {
                 "allowed_parameters": {
@@ -924,12 +924,12 @@ const docTemplate = `{
                 "allowed_classes": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "type": "integer"
                     },
                     "example": [
-                        "1",
-                        "1033",
-                        "3023"
+                        1,
+                        1033,
+                        3023
                     ]
                 },
                 "id": {

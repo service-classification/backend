@@ -7,21 +7,21 @@ import (
 
 type Handler struct {
 	ServiceRepo   repositories.ServiceRepository
-	GroupRepo     repositories.GroupRepository
+	ClassRepo     repositories.ClassRepository
 	ParameterRepo repositories.ParameterRepository
 
-	GroupService     *services.GroupService
+	ClassService     *services.ClassService
 	ParameterService *services.ParameterService
 }
 
-func NewHandler(serviceRepo repositories.ServiceRepository, groupRepo repositories.GroupRepository, paramRepo repositories.ParameterRepository) *Handler {
-	groupService := services.NewGroupService(groupRepo)
+func NewHandler(serviceRepo repositories.ServiceRepository, classRepository repositories.ClassRepository, paramRepo repositories.ParameterRepository) *Handler {
+	classService := services.NewClassService(classRepository)
 	parameterService := services.NewParameterService(paramRepo)
 	return &Handler{
 		ServiceRepo:      serviceRepo,
-		GroupRepo:        groupRepo,
+		ClassRepo:        classRepository,
 		ParameterRepo:    paramRepo,
-		GroupService:     groupService,
+		ClassService:     classService,
 		ParameterService: parameterService,
 	}
 }

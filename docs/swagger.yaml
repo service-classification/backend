@@ -12,12 +12,12 @@ definitions:
     - parameters
     - title
     type: object
-  handlers.assignGroupRequest:
+  handlers.assignClassRequest:
     properties:
-      group_id:
+      class_id:
         type: integer
     type: object
-  models.Group:
+  models.Class:
     properties:
       created_at:
         type: string
@@ -43,12 +43,12 @@ definitions:
     properties:
       approved_at:
         type: string
+      class:
+        $ref: '#/definitions/models.Class'
+      class_id:
+        type: integer
       created_at:
         type: string
-      group:
-        $ref: '#/definitions/models.Group'
-      group_id:
-        type: integer
       id:
         type: integer
       parameters:
@@ -58,7 +58,7 @@ definitions:
       title:
         type: string
     type: object
-  services.GroupView:
+  services.ClassView:
     properties:
       allowed_parameters:
         example:
@@ -78,11 +78,11 @@ definitions:
     properties:
       allowed_classes:
         example:
-        - "1"
-        - "1033"
-        - "3023"
+        - 1
+        - 1033
+        - 3023
         items:
-          type: string
+          type: integer
         type: array
       id:
         example: fix_ctv
@@ -97,11 +97,11 @@ info:
   title: MyApp API
   version: "1.0"
 paths:
-  /groups:
+  /classes:
     get:
       consumes:
       - application/json
-      description: Retrieves a list of groups with pagination.
+      description: Retrieves a list of classes with pagination.
       parameters:
       - default: 0
         description: Offset
@@ -120,7 +120,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.Group'
+              $ref: '#/definitions/models.Class'
             type: array
         "400":
           description: Bad Request
@@ -134,27 +134,27 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: List groups with pagination
+      summary: List classes with pagination
       tags:
-      - Groups
+      - Classes
     post:
       consumes:
       - application/json
-      description: Creates a new group with the provided details.
+      description: Creates a new class with the provided details.
       parameters:
-      - description: Group details
+      - description: Class details
         in: body
-        name: group
+        name: class
         required: true
         schema:
-          $ref: '#/definitions/services.GroupView'
+          $ref: '#/definitions/services.ClassView'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.Group'
+            $ref: '#/definitions/models.Class'
         "400":
           description: Invalid input
           schema:
@@ -167,24 +167,24 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Create a new group
+      summary: Create a new class
       tags:
-      - Groups
-  /groups/{id}:
+      - Classes
+  /classes/{id}:
     delete:
-      description: Deletes a group by its ID. If the group is used in any services,
+      description: Deletes a class by its ID. If the class is used in any services,
         it returns an error.
       parameters:
-      - description: Group ID
+      - description: Class ID
         in: path
         name: id
         required: true
         type: integer
       responses:
         "204":
-          description: Group deleted successfully
+          description: Class deleted successfully
         "400":
-          description: Group is used in services
+          description: Class is used in services
           schema:
             additionalProperties:
               type: string
@@ -195,15 +195,15 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Delete a group
+      summary: Delete a class
       tags:
-      - Groups
+      - Classes
     get:
       consumes:
       - application/json
-      description: Retrieves a group by its ID.
+      description: Retrieves a class by its ID.
       parameters:
-      - description: Group ID
+      - description: Class ID
         in: path
         name: id
         required: true
@@ -214,7 +214,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/services.GroupView'
+            $ref: '#/definitions/services.ClassView'
         "400":
           description: Bad Request
           schema:
@@ -233,34 +233,34 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Get a group by ID
+      summary: Get a class by ID
       tags:
-      - Groups
+      - Classes
     put:
       consumes:
       - application/json
-      description: Updates the details of an existing group.
+      description: Updates the details of an existing class.
       parameters:
-      - description: Group ID
+      - description: Class ID
         in: path
         name: id
         required: true
         type: integer
-      - description: Group details
+      - description: Class details
         in: body
-        name: group
+        name: class
         required: true
         schema:
-          $ref: '#/definitions/services.GroupView'
+          $ref: '#/definitions/services.ClassView'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Group'
+            $ref: '#/definitions/models.Class'
         "400":
-          description: Invalid input or group is used in services
+          description: Invalid input or class is used in services
           schema:
             additionalProperties:
               type: string
@@ -271,9 +271,9 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Update an existing group
+      summary: Update an existing class
       tags:
-      - Groups
+      - Classes
   /parameters:
     get:
       description: Retrieves a list of parameters with pagination.
@@ -543,20 +543,20 @@ paths:
     post:
       consumes:
       - application/json
-      description: Approves a service by its ID. If a group ID is provided in the
-        request body, it assigns the group to the service before approval.
+      description: Approves a service by its ID. If a class ID is provided in the
+        request body, it assigns the class to the service before approval.
       parameters:
       - description: Service ID
         in: path
         name: id
         required: true
         type: integer
-      - description: Group ID
+      - description: Class ID
         in: body
-        name: group
+        name: class
         required: true
         schema:
-          $ref: '#/definitions/handlers.assignGroupRequest'
+          $ref: '#/definitions/handlers.assignClassRequest'
       produces:
       - application/json
       responses:
@@ -571,7 +571,7 @@ paths:
               type: string
             type: object
         "404":
-          description: Service or group not found
+          description: Service or class not found
           schema:
             additionalProperties:
               type: string
@@ -585,9 +585,9 @@ paths:
       summary: Approve a service
       tags:
       - Services
-  /services/{id}/proposed_groups:
+  /services/{id}/proposed_classes:
     get:
-      description: Fetches a list of proposed groups for a service based on similar
+      description: Fetches a list of proposed classes for a service based on similar
         parameters.
       parameters:
       - description: Service ID
@@ -602,7 +602,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.Group'
+              $ref: '#/definitions/models.Class'
             type: array
         "400":
           description: Invalid service ID
@@ -622,7 +622,7 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: List proposed groups for a service
+      summary: List proposed classes for a service
       tags:
       - Services
 schemes:

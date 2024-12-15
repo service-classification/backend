@@ -88,15 +88,6 @@ func (h *Handler) buildPayload(parameters []models.Parameter) map[string]int {
 	return payload
 }
 
-func contains(slice []models.Parameter, item models.Parameter) bool {
-	for _, s := range slice {
-		if s == item {
-			return true
-		}
-	}
-	return false
-}
-
 func callMLModel(payload map[string]int) ([]Prediction, error) {
 	url := os.Getenv("ML_MODEL_URL")   // todo from config
 	token := os.Getenv("BEARER_TOKEN") // todo from config
@@ -137,6 +128,6 @@ func callMLModel(payload map[string]int) ([]Prediction, error) {
 }
 
 type Prediction struct {
-	GroupID     int     `json:"group_id"`
+	ClassID     int     `json:"group_id"`
 	Probability float64 `json:"probability"`
 }

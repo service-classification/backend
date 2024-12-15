@@ -64,12 +64,12 @@ func (h *Handler) CreateService(c *gin.Context) {
 			return
 		}
 		if len(predictions) > 0 {
-			group, err := h.GroupRepo.GetByID(uint(predictions[0].GroupID))
+			class, err := h.ClassRepo.GetByID(uint(predictions[0].ClassID))
 			if err != nil {
-				log.Println("Group not found:", err)
+				log.Println("Class not found:", err)
 				return
 			}
-			service.Group = group
+			service.Class = class
 			err = h.ServiceRepo.Update(service)
 			if err != nil {
 				log.Println("Error updating service:", err)
@@ -127,23 +127,23 @@ func (h *Handler) GetServiceByID(c *gin.Context) {
 	c.JSON(http.StatusOK, service)
 }
 
-type assignGroupRequest struct {
-	GroupID *uint `json:"group_id,omitempty"`
+type assignClassRequest struct {
+	ClassID *uint `json:"class_id,omitempty"`
 }
 
 // ApproveService godoc
 //
 //	@Summary		Approve a service
-//	@Description	Approves a service by its ID. If a group ID is provided in the request body, it assigns the group to the service before approval.
+//	@Description	Approves a service by its ID. If a class ID is provided in the request body, it assigns the class to the service before approval.
 //	@Tags			Services
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		int					true	"Service ID"
-//	@Param			group	body		assignGroupRequest	true	"Group ID"
-//	@Success		200		{object}	models.Service
-//	@Failure		400		{object}	map[string]string	"Invalid input"
-//	@Failure		404		{object}	map[string]string	"Service or group not found"
-//	@Failure		500		{object}	map[string]string	"Internal server error"
+//	@Param			id			path		int						true	"Service ID"
+//	@Param			class	body		assignClassRequest	true	"Class ID"
+//	@Success		200			{object}	models.Service
+//	@Failure		400			{object}	map[string]string	"Invalid input"
+//	@Failure		404			{object}	map[string]string	"Service or class not found"
+//	@Failure		500			{object}	map[string]string	"Internal server error"
 //	@Router			/services/{id}/approve [post]
 func (h *Handler) ApproveService(c *gin.Context) {
 	serviceID, err := strconv.Atoi(c.Param("id"))
@@ -152,7 +152,7 @@ func (h *Handler) ApproveService(c *gin.Context) {
 		return
 	}
 
-	req := assignGroupRequest{}
+	req := assignClassRequest{}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON body"})
 		return
@@ -169,21 +169,21 @@ func (h *Handler) ApproveService(c *gin.Context) {
 		return
 	}
 
-	if req.GroupID == nil && service.Group == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Group ID is required"})
+	if req.ClassID == nil && service.Class == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Class ID is required"})
 		return
 	}
 
-	group := service.Group
-	if req.GroupID != nil {
-		group, err = h.GroupRepo.GetByID(*req.GroupID)
+	class := service.Class
+	if req.ClassID != nil {
+		class, err = h.ClassRepo.GetByID(*req.ClassID)
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Group not found"})
+			c.JSON(http.StatusNotFound, gin.H{"error": "Class not found"})
 			return
 		}
 	}
 
-	service.Group = group
+	service.Class = class
 	now := time.Now()
 	service.ApprovedAt = &now
 
@@ -197,19 +197,19 @@ func (h *Handler) ApproveService(c *gin.Context) {
 	c.JSON(http.StatusOK, service)
 }
 
-// ListProposedGroups godoc
+// ListProposedClasses godoc
 //
-//	@Summary		List proposed groups for a service
-//	@Description	Fetches a list of proposed groups for a service based on similar parameters.
+//	@Summary		List proposed classes for a service
+//	@Description	Fetches a list of proposed classes for a service based on similar parameters.
 //	@Tags			Services
 //	@Produce		json
 //	@Param			id	path		int	true	"Service ID"
-//	@Success		200	{array}		models.Group
+//	@Success		200	{array}		models.Class
 //	@Failure		400	{object}	map[string]string	"Invalid service ID"
 //	@Failure		404	{object}	map[string]string	"Service not found"
 //	@Failure		500	{object}	map[string]string	"Internal server error"
-//	@Router			/services/{id}/proposed_groups [get]
-func (h *Handler) ListProposedGroups(c *gin.Context) {
+//	@Router			/services/{id}/proposed_classes [get]
+func (h *Handler) ListProposedClasses(c *gin.Context) {
 	serviceID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid service ID"})
@@ -225,11 +225,11 @@ func (h *Handler) ListProposedGroups(c *gin.Context) {
 	//todo find approved services with similar parameters
 	_ = service
 
-	groups, err := h.GroupRepo.List(0, 5)
+	classes, err := h.ClassRepo.List(0, 5)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, groups)
+	c.JSON(http.StatusOK, classes)
 }
