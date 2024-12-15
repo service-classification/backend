@@ -243,9 +243,13 @@ func (s *Service) GetClassConstraints(ctx context.Context, classID uint) ([]stri
 		PREFIX : <%s>
 		SELECT ?allowedParam
 		WHERE {
-			:class_%d :hasAllowedParameter ?allowedParam .
+			{
+				:class_%d :hasAllowedParameter ?allowedParam .
+			}
 			UNION
-			?allowedParam :allowedClass :class_%d .
+			{
+				?allowedParam :allowedClass :class_%d .
+			}
 		}
 	`, s.prefix, classID, classID)
 
