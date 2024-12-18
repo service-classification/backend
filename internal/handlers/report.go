@@ -24,6 +24,7 @@ import (
 func (h *Handler) BuildReport(c *gin.Context) {
 	c.Header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 	c.Header("Content-Disposition", "attachment; filename=report_profit_2024.xlsx")
+	c.Header("Access-Control-Expose-Headers", "*")
 
 	f := excelize.NewFile()
 
