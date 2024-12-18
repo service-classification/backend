@@ -42,15 +42,11 @@ func (s *Service) AddParameter(ctx context.Context, parameter models.ParameterVi
 func (s *Service) buildUpdateParameterQuery(parameter models.ParameterView, forUpdate bool) string {
 	allowedClasses := make([]string, 0, len(parameter.AllowedClasses))
 	for _, class := range parameter.AllowedClasses {
-		allowedClasses = append(allowedClasses, fmt.Sprintf("\t:allowedClass :class_%d", class))
+		allowedClasses = append(allowedClasses, fmt.Sprintf(":class_%d :hasAllowedParameter :param_%s", class, parameter.ID))
 	}
-	classes := strings.Join(allowedClasses, " ;\n")
+	classes := strings.Join(allowedClasses, " .\n")
 	if len(classes) > 0 {
-		if len(parameter.ContradictionParameters) > 0 {
-			classes += " ;\n"
-		} else {
-			classes += " .\n"
-		}
+		classes += " .\n"
 	}
 
 	contradictions := make([]string, 0, len(parameter.ContradictionParameters))
@@ -63,9 +59,11 @@ func (s *Service) buildUpdateParameterQuery(parameter models.ParameterView, forU
 	}
 
 	var update strings.Builder
-	update.WriteString("PREFIX : <")
-	update.WriteString(s.prefix)
-	update.WriteString(">\n")
+	if !forUpdate {
+		update.WriteString("PREFIX : <")
+		update.WriteString(s.prefix)
+		update.WriteString(">\n")
+	}
 	if !forUpdate {
 		update.WriteString("INSERT DATA {\n")
 	} else {
@@ -74,16 +72,16 @@ func (s *Service) buildUpdateParameterQuery(parameter models.ParameterView, forU
 	update.WriteString("\t:param_")
 	update.WriteString(parameter.ID)
 	update.WriteString(" a :Parameter")
-	if len(parameter.AllowedClasses) == 0 && len(parameter.ContradictionParameters) == 0 {
+	if len(parameter.ContradictionParameters) == 0 {
 		update.WriteString(" .\n")
 	} else {
 		update.WriteString(" ;\n")
 	}
-	if len(classes) > 0 {
-		update.WriteString(classes)
-	}
 	if len(contradictionsStr) > 0 {
 		update.WriteString(contradictionsStr)
+	}
+	if len(classes) > 0 {
+		update.WriteString(classes)
 	}
 	update.WriteString("}")
 
@@ -93,27 +91,93 @@ func (s *Service) buildUpdateParameterQuery(parameter models.ParameterView, forU
 func (s *Service) UpdateParameter(ctx context.Context, parameter models.ParameterView) error {
 	update := s.buildUpdateParameterQuery(parameter, true)
 
-	update += fmt.Sprintf(`
+	constraints, contr, err := s.GetParameterConstraints(ctx, parameter.ID)
+	if err != nil {
+		return err
+	}
+	old := models.ParameterView{
+		ID:                      parameter.ID,
+		Title:                   parameter.Title,
+		AllowedClasses:          constraints,
+		ContradictionParameters: contr,
+	}
+	delete := s.buildDeleteParameterQuery(old)
+
+	update = fmt.Sprintf(`
+		PREFIX : <%s>
+		%s
+		%s
 		WHERE {
 		  :param_%s ?p ?o .
 		}
-	`, parameter.ID)
+	`, s.prefix, delete, update, parameter.ID)
 
 	return s.runSparqlUpdate(ctx, update)
 }
 
-func (s *Service) DeleteParameter(ctx context.Context, id string) error {
+func (s *Service) DeleteParameter(ctx context.Context, parameterID string) error {
+	constraints, contr, err := s.GetParameterConstraints(ctx, parameterID)
+	if err != nil {
+		return err
+	}
+
+	view := models.ParameterView{
+		ID:                      parameterID,
+		AllowedClasses:          constraints,
+		ContradictionParameters: contr,
+	}
+
+	delete := s.buildDeleteParameterQuery(view)
 	update := fmt.Sprintf(`
 		PREFIX : <%s>
-		DELETE {
-		  :param_%s ?p ?o .
-		}
+		%s
 		WHERE {
 		  :param_%s ?p ?o .
 		}
-	`, s.prefix, id, id)
+	`, s.prefix, delete, parameterID)
 
 	return s.runSparqlUpdate(ctx, update)
+}
+
+func (s *Service) buildDeleteParameterQuery(parameter models.ParameterView) string {
+	allowedClasses := make([]string, 0, len(parameter.AllowedClasses))
+	for _, class := range parameter.AllowedClasses {
+		allowedClasses = append(allowedClasses, fmt.Sprintf(":class_%d :hasAllowedParameter :param_%s", class, parameter.ID))
+	}
+	classes := strings.Join(allowedClasses, " .\n")
+	if len(classes) > 0 {
+		classes += " .\n"
+	}
+
+	contradictions := make([]string, 0, len(parameter.ContradictionParameters))
+	for _, contradiction := range parameter.ContradictionParameters {
+		contradictions = append(contradictions, fmt.Sprintf("\t:hasContradictionParameter :param_%s", contradiction))
+	}
+	contradictionsStr := strings.Join(contradictions, " ;\n")
+	if len(contradictionsStr) > 0 {
+		contradictionsStr += " .\n"
+	}
+
+	var del strings.Builder
+
+	del.WriteString("DELETE {\n")
+	del.WriteString("\t:param_")
+	del.WriteString(parameter.ID)
+	del.WriteString(" a :Parameter")
+	if len(parameter.ContradictionParameters) == 0 {
+		del.WriteString(" .\n")
+	} else {
+		del.WriteString(" ;\n")
+	}
+	if len(contradictionsStr) > 0 {
+		del.WriteString(contradictionsStr)
+	}
+	if len(classes) > 0 {
+		del.WriteString(classes)
+	}
+	del.WriteString("}")
+
+	return del.String()
 }
 
 func (s *Service) GetParameterConstraints(ctx context.Context, parameterID string) ([]uint, []string, error) {
@@ -144,12 +208,8 @@ func (s *Service) GetParameterConstraints(ctx context.Context, parameterID strin
 			{ 
 				?class :hasAllowedParameter :param_%s .
 			}
-			UNION
-			{
-				:param_%s :allowedClass ?class .
-			}  
 		}
-	`, s.prefix, parameterID, parameterID)
+	`, s.prefix, parameterID)
 
 	allowedClasses, err := s.query(ctx, query)
 	if err != nil {
@@ -188,9 +248,11 @@ func (s *Service) buildUpdateClassQuery(class models.ClassView, forUpdate bool) 
 	}
 
 	var update strings.Builder
-	update.WriteString("PREFIX : <")
-	update.WriteString(s.prefix)
-	update.WriteString(">\n")
+	if !forUpdate {
+		update.WriteString("PREFIX : <")
+		update.WriteString(s.prefix)
+		update.WriteString(">\n")
+	}
 	if !forUpdate {
 		update.WriteString("INSERT DATA {\n")
 	} else {
@@ -215,25 +277,78 @@ func (s *Service) buildUpdateClassQuery(class models.ClassView, forUpdate bool) 
 func (s *Service) UpdateClass(ctx context.Context, class models.ClassView) error {
 	update := s.buildUpdateClassQuery(class, true)
 
-	update += fmt.Sprintf(`
+	constraints, err := s.GetClassConstraints(ctx, class.ID)
+	if err != nil {
+		return err
+	}
+
+	old := models.ClassView{
+		ID:                class.ID,
+		Title:             class.Title,
+		AllowedParameters: constraints,
+	}
+	delete := s.buildDeleteClassQuery(old)
+
+	update = fmt.Sprintf(`
+		PREFIX : <%s>
+		%s
+		%s
 		WHERE {
 		  :class_%d ?p ?o .
 		}
-	`, class.ID)
+	`, s.prefix, delete, update, class.ID)
 
 	return s.runSparqlUpdate(ctx, update)
 }
 
+func (s *Service) buildDeleteClassQuery(class models.ClassView) string {
+	allowedParameters := make([]string, 0, len(class.AllowedParameters))
+	for _, parameter := range class.AllowedParameters {
+		allowedParameters = append(allowedParameters, fmt.Sprintf("\t:hasAllowedParameter :param_%s", parameter))
+	}
+	parameters := strings.Join(allowedParameters, " ;\n")
+	if len(parameters) > 0 {
+		parameters += " .\n"
+	}
+
+	var del strings.Builder
+
+	del.WriteString("DELETE {\n")
+	del.WriteString("\t:class_")
+	del.WriteString(strconv.FormatUint(uint64(class.ID), 10))
+	del.WriteString(" a :Class")
+	if len(class.AllowedParameters) > 0 {
+		del.WriteString(" ;\n")
+	} else {
+		del.WriteString(" .\n")
+	}
+	if len(parameters) > 0 {
+		del.WriteString(parameters)
+	}
+	del.WriteString("}")
+
+	return del.String()
+}
+
 func (s *Service) DeleteClass(ctx context.Context, id uint) error {
+	constraints, err := s.GetClassConstraints(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	old := models.ClassView{
+		ID:                id,
+		AllowedParameters: constraints,
+	}
+	query := s.buildDeleteClassQuery(old)
+
 	update := fmt.Sprintf(`
 		PREFIX : <%s>
-		DELETE {
-		  :class_%d ?p ?o .
-		}
+		%s
 		WHERE {
 		  :class_%d ?p ?o .
 		}
-	`, s.prefix, id, id)
+	`, s.prefix, query, id)
 
 	return s.runSparqlUpdate(ctx, update)
 }
@@ -246,12 +361,8 @@ func (s *Service) GetClassConstraints(ctx context.Context, classID uint) ([]stri
 			{
 				:class_%d :hasAllowedParameter ?allowedParam .
 			}
-			UNION
-			{
-				?allowedParam :allowedClass :class_%d .
-			}
 		}
-	`, s.prefix, classID, classID)
+	`, s.prefix, classID)
 
 	result, err := s.query(ctx, query)
 	if err != nil {

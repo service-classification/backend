@@ -13,16 +13,10 @@
 :Service a owl:Class ;
     rdfs:label "Service" .
 
-:allowedClass a owl:ObjectProperty ;
-    rdfs:domain :Parameter ;
-    rdfs:range :Class ;
-    rdfs:label "allowed class" .
-
 :hasAllowedParameter a owl:ObjectProperty ;
     rdfs:domain :Class ;
     rdfs:range :Parameter ;
-    rdfs:label "has allowed parameter" ;
-    owl:inverseOf :allowedClass .
+    rdfs:label "has allowed parameter" .
 
 :hasContradictionParameter a owl:ObjectProperty, owl:SymmetricProperty ;
     rdfs:domain :Parameter ;

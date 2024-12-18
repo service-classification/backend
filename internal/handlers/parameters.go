@@ -184,13 +184,13 @@ func (h *Handler) DeleteParameter(c *gin.Context) {
 		return
 	}
 
-	if err := h.ParameterRepo.Delete(parameterID); err != nil {
+	err = h.jenaService.DeleteParameter(c, parameterID)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	err = h.jenaService.DeleteParameter(c, parameterID)
-	if err != nil {
+	if err := h.ParameterRepo.Delete(parameterID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
