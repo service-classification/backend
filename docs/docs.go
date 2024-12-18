@@ -514,9 +514,9 @@ const docTemplate = `{
         },
         "/report": {
             "get": {
-                "description": "Generates a fiscal report in PDF format and returns it as a downloadable file.",
+                "description": "Generates a fiscal report in Excel format and returns it as a downloadable file.",
                 "produces": [
-                    "application/pdf"
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 ],
                 "tags": [
                     "Reports"
