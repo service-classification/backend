@@ -19,6 +19,7 @@ func SetupRouter(h *handlers.Handler) *gin.Engine {
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders: []string{"*"},
 	}))
 
 	// Service routes
