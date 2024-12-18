@@ -433,7 +433,8 @@ func (s *Service) ValidateService(ctx context.Context, service *models.Service) 
 
 	contradictions := make([]string, 0, len(result.Results.Bindings))
 	for _, binding := range result.Results.Bindings {
-		contradictions = append(contradictions, binding["p1"]["value"])
+		value := strings.TrimPrefix(binding["p1"]["value"], s.prefix+"param_")
+		contradictions = append(contradictions, value)
 	}
 
 	return contradictions, nil

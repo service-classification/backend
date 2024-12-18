@@ -58,7 +58,16 @@ func (h *Handler) CreateService(c *gin.Context) {
 		return
 	}
 	if len(invalidParameters) > 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid parameters: " + strings.Join(invalidParameters, ", ")})
+		params := make([]string, 0, len(invalidParameters))
+		for _, paramID := range invalidParameters {
+			parameter, err := h.ParameterRepo.GetByID(paramID)
+			if err != nil {
+				log.Println("Invalid parameter:", err)
+				continue
+			}
+			params = append(params, parameter.Title)
+		}
+		c.JSON(http.StatusBadRequest, gin.H{"error": "This service contain contradiction parameters: " + strings.Join(params, ", ")})
 		return
 	}
 
